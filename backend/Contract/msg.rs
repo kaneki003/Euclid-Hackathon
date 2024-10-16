@@ -1,11 +1,35 @@
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use cosmwasm_std::Uint128;
+use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::{Addr, Uint128};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct PlaceBetMsg {
-    pub amount: Uint128, // Bet amount in tokens
+use crate::state::GameSession;
+
+#[cw_serde]
+pub struct InstantiateMsg {}
+
+#[cw_serde]
+pub enum ExecuteMsg {
+    PlaceBet {
+        amount: Uint128,
+        player: Addr,
+    },
+    ResolveGame {
+        player: Addr,
+        number: Uint128,
+    },
+    ClaimWinnings {
+        player: Addr,
+    },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct ClaimWinningsMsg;
+#[cw_serde]
+#[derive(QueryResponses)]
+pub enum QueryMsg {
+    #[returns(Vec<GameSession>)]
+    GetActiveSessions {},
+
+    #[returns(GameSession)]
+    GetPlayerSession {
+        player: Addr,
+    },
+}
+

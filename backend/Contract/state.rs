@@ -8,7 +8,6 @@ use std::collections::HashMap;
 pub struct GameSession {
     pub player: Addr,
     pub bet_amount: Uint128,
-    pub random_number: Option<u64>,
     pub is_active: bool,
     pub is_winner: bool,
 }
@@ -16,7 +15,6 @@ pub struct GameSession {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct State {
     pub owner: Addr,
-    //HashMap where the key is the player's address, and the value is their session
     pub sessions: HashMap<Addr, GameSession>,
 }
 
