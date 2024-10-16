@@ -15,7 +15,7 @@ pub struct GameSession {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct State {
     pub owner: Addr,
-    pub sessions: HashMap<Addr, GameSession>,
+    pub sessions: HashMap<String, GameSession>, //changes key to string value
 }
 
 pub const STATE: Item<State> = Item::new("state");

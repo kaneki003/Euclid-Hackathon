@@ -74,7 +74,7 @@ fn place_bet(
     };
 
     // Insert session into the map with the player's address as the key
-    state.sessions.insert(player.clone(), session);
+    state.sessions.insert(player.to_string(), session);
     STATE.save(deps.storage, &state)?;
 
     Ok(Response::new().add_attribute("action", "bet_placed"))
@@ -92,7 +92,7 @@ fn resolve_game(
     check_owner(&state, &sender)?;
 
     // Find the session for the passed player
-    if let Some(mut session) = state.sessions.get_mut(&player).cloned() {
+    if let Some(mut session) = state.sessions.get_mut(&player.to_string()).cloned() {
         if session.is_active {
             let random_number = number.u128();
 
@@ -106,9 +106,9 @@ fn resolve_game(
                 claim_winnings(deps.branch(), player.clone(), sender)?;
             }
 
-            let is_winner= session.is_winner;
+            let is_winner = session.is_winner;
 
-            state.sessions.insert(player.clone(), session);
+            state.sessions.insert(player.to_string(), session);
             STATE.save(deps.storage, &state)?;
 
             return Ok(
@@ -130,18 +130,18 @@ fn claim_winnings(
 
     check_owner(&state, &sender)?;
 
-    if let Some(session) = state.sessions.get(&player) {
-        if !session.is_active && session.is_winner {
+    if let Some(session) = state.sessions.get(&player.to_string()) {
+        if session.is_active && session.is_winner {
             let payout = session.bet_amount; 
             // Remove the session from the map after making the payment
-            state.sessions.remove(&player);
+            state.sessions.remove(&player.to_string());
             STATE.save(deps.storage, &state)?;
 
             return Ok(
                 Response::new().add_attribute("action", "claim_winnings").add_attribute("amount", payout)
             );
         } else {
-            state.sessions.remove(&player);
+            state.sessions.remove(&player.to_string());
             return Ok(Response::new().add_attribute("action", "player_lost").add_attribute("amount", "0"));
         }
     }
@@ -162,12 +162,9 @@ fn query_active_sessions(deps: Deps) -> StdResult<Vec<GameSession>> {
 
 fn query_player_session(deps: Deps, player: Addr) -> StdResult<GameSession> {
     let state = STATE.load(deps.storage)?;
-    if let Some(session) = state.sessions.get(&player).cloned() {
+    if let Some(session) = state.sessions.get(&player.to_string()).cloned() {
         return Ok(session)
     } else {
         return Err(cosmwasm_std::StdError::generic_err("No active session found for the user"))
     }
 }
-
-#[cfg(test)]
-mod tests {}
