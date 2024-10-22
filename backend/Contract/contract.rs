@@ -34,7 +34,7 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::PlaceBet { amount, player,mines } => place_bet(deps, amount, player,mines,info.sender),
+        ExecuteMsg::PlaceBet { amount, player,mines } => place_bet(deps, amount,player,mines,info.sender),
         ExecuteMsg::ResolveGame { player, number } => resolve_game(deps, player, info.sender, number),
         ExecuteMsg::ClaimWinnings { player } => claim_winnings(deps, player, info.sender),
     }
@@ -56,9 +56,10 @@ fn check_owner(state: &State, sender: &Addr) -> StdResult<()> {
     Ok(())
 }
 
+//Amount to be sent in 8 decimals
 fn place_bet(
     deps: DepsMut,
-    amount: f64,
+    amount: Uint128,
     player: Addr,
     mines: Uint128,
     sender: Addr,
@@ -71,9 +72,9 @@ fn place_bet(
         player: player.clone(),
         bet_amount: amount,
         mines: mines,
-        probability: 1.0,
+        probability: Uint128::new(100000000),
         wins: Uint128::new(0),
-        multiplier: 1.0,
+        multiplier: Uint128::new(100000000), //Upto 8 decimals of precision
         is_active: true,
         is_winner: false,
     };
@@ -100,17 +101,22 @@ fn resolve_game(
             let random_number = number.u128();
 
             let current_probability = (25 - session.wins.u128()-session.mines.u128()) as f64 / 25.0;
-            let mut multiplier = 1.0 / (current_probability * session.probability);
 
-            if multiplier > 5000000.0_f64 {
-                multiplier = 5000000.0; //Capping multiplier to 5 million...
+            let probability=(session.probability.u128() as f64 /100000000.0) * current_probability;
+            
+            let mut multiplier: f64 = 1.0 / probability;
+            multiplier = multiplier * 100000000.0; //Converting to 8 decimals of precision
+
+            if multiplier > 5000000.0 * 100000000.0 {
+                multiplier = 5000000.0* 100000000.0; //Capping multiplier to 5 million...
             }
 
-            if (random_number as f64 / 100.0) < current_probability {
+            // numbers ranging between 1 and 10 000 000
+            if (random_number as f64 / 100000000.0) < current_probability {
                 session.is_winner = true;
-                session.multiplier = multiplier;
+                session.multiplier = Uint128::from(multiplier as u128);
                 session.wins += Uint128::new(1);
-                session.probability = current_probability * session.probability;
+                session.probability = Uint128::from((probability * 100000000.0) as u128);
             } else {
                 // Player loses, claim winnings (collect player's bet)
                 session.is_winner = false;
@@ -149,7 +155,7 @@ fn claim_winnings(
         if session.is_active && session.is_winner { 
             // Remove the session from the map after making the payment
 
-            let payout = session.bet_amount * session.multiplier;
+            let payout = session.bet_amount.u128() as f64 * (session.multiplier.u128() as f64 / 100000000.0);
             state.sessions.remove(&player.to_string());
             STATE.save(deps.storage, &state)?;
 

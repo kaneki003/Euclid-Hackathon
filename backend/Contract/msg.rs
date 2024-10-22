@@ -9,7 +9,7 @@ pub struct InstantiateMsg {}
 #[cw_serde]
 pub enum ExecuteMsg {
     PlaceBet {
-        amount: f64,
+        amount: Uint128,
         player: Addr,
         mines: Uint128,
     },

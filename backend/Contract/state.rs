@@ -7,10 +7,10 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct GameSession {
     pub player: Addr,
-    pub bet_amount: f64,
+    pub bet_amount: Uint128,
     pub mines: Uint128,
-    pub probability: f64,
-    pub multiplier: f64,
+    pub probability: Uint128,
+    pub multiplier: Uint128,
     pub wins: Uint128,
     pub is_active: bool,
     pub is_winner: bool,
