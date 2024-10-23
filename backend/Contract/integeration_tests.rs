@@ -5,7 +5,7 @@ mod tests {
         testing::{message_info, mock_dependencies, mock_env, MockApi, MockQuerier, MockStorage}, Addr, OwnedDeps, Uint128
     };
     use msg::{ExecuteMsg, InstantiateMsg};
-    use crate::{contract, msg, state::{GameSession, State, STATE}};
+    use crate::{contract, msg, state::{GameSession, State, STATE, SESSIONS}};
 
     // Helper function to set up the mock dependencies
     fn setup_contract() -> OwnedDeps<MockStorage, MockApi, MockQuerier> {
@@ -21,7 +21,7 @@ mod tests {
         let deps = setup_contract();
         let state: State = STATE.load(&deps.storage).unwrap();
         assert_eq!(state.owner, Addr::unchecked("creator"));
-        assert!(state.sessions.is_empty());
+        assert!(SESSIONS.is_empty(&deps.storage));
     }
 
     #[test]
@@ -31,8 +31,6 @@ mod tests {
         let bet_amount = Uint128::new(100);
         let info = message_info(&Addr::unchecked("creator"), &[]); // Owner checking in
 
-        print!("{}", info.sender.to_string());
-    
         let msg = ExecuteMsg::PlaceBet {
             amount: bet_amount,
             player: player.clone(),
@@ -43,10 +41,9 @@ mod tests {
         assert_eq!(res.attributes, vec![("action", "bet_placed")]);
 
         // Check that the session was created
-        let state = STATE.load(&deps.storage).unwrap();
-        let session: GameSession = state
-            .sessions
-            .get(&player.to_string())  // Using String as the key
+        let session: GameSession = SESSIONS
+            .may_load(&deps.storage, player.to_string())  // Using String as the key
+            .unwrap()
             .unwrap()
             .clone();
 
@@ -85,7 +82,7 @@ mod tests {
 
         // Check that the session is updated correctly
         let player_addr = Addr::unchecked(player.clone());
-        let session: GameSession = STATE.load(&deps.storage).unwrap().sessions.get(&player_addr.to_string()).unwrap().clone();
+        let session: GameSession = SESSIONS.may_load(&deps.storage,player_addr.to_string()).unwrap().unwrap().clone();
         assert!(session.is_winner);
 
         // Calculate expected bet amount based on the multiplier
@@ -129,8 +126,7 @@ mod tests {
         // Check that the session is removed
         let player_addr = Addr::unchecked
         (player.clone());
-        let state = STATE.load(&deps.storage).unwrap();
-        assert!(!state.sessions.contains_key(&player_addr.to_string()));
+        assert!(SESSIONS.may_load(&deps.storage, player_addr.to_string()).unwrap().is_none());
     }
 
     #[test]
@@ -168,6 +164,6 @@ mod tests {
 
         // Check that the session is removed
         let player_addr = Addr::unchecked(player.clone());
-        assert!(STATE.load(&deps.storage).unwrap().sessions.get(&player_addr.to_string()).is_none());
+        assert!(SESSIONS.may_load(&deps.storage,player_addr.to_string()).unwrap().is_none());
     }
 }
