@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const GRID_SIZE = 5;
 const MAX_MINES = Math.floor((GRID_SIZE * GRID_SIZE) / 2); // Max number of mines is half the grid cells
@@ -13,7 +13,7 @@ function Home() {
   const generateGrid = () => {
     const newGrid = Array(GRID_SIZE)
       .fill(null)
-      .map(() => Array(GRID_SIZE).fill({ type: 'empty', revealed: false }));
+      .map(() => Array(GRID_SIZE).fill({ type: "empty", revealed: false }));
 
     let mineCount = 0;
     let diamondCount = 0;
@@ -23,8 +23,8 @@ function Home() {
       const x = Math.floor(Math.random() * GRID_SIZE);
       const y = Math.floor(Math.random() * GRID_SIZE);
 
-      if (newGrid[x][y].type === 'empty') {
-        newGrid[x][y] = { type: 'mine', revealed: false };
+      if (newGrid[x][y].type === "empty") {
+        newGrid[x][y] = { type: "mine", revealed: false };
         mineCount++;
       }
     }
@@ -34,8 +34,8 @@ function Home() {
       const x = Math.floor(Math.random() * GRID_SIZE);
       const y = Math.floor(Math.random() * GRID_SIZE);
 
-      if (newGrid[x][y].type === 'empty') {
-        newGrid[x][y] = { type: 'diamond', revealed: false };
+      if (newGrid[x][y].type === "empty") {
+        newGrid[x][y] = { type: "diamond", revealed: false };
         diamondCount++;
       }
     }
@@ -60,10 +60,10 @@ function Home() {
 
     setGrid(newGrid);
 
-    if (newGrid[x][y].type === 'mine') {
+    if (newGrid[x][y].type === "mine") {
       setGameOver(true);
       setGameStarted(false); // End the game when a mine is revealed
-    } else if (newGrid[x][y].type === 'diamond') {
+    } else if (newGrid[x][y].type === "diamond") {
       setScore(score + 10);
     }
   };
@@ -103,12 +103,16 @@ function Home() {
           <div>
             <span className="block text-white mb-2">Bet Amount</span>
             <div className="flex items-center space-x-4">
-              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">Min</button>
+              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+                Min
+              </button>
               <input
                 type="text"
                 className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
               />
-              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">Max</button>
+              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+                Max
+              </button>
             </div>
           </div>
         </div>
@@ -151,7 +155,7 @@ function Home() {
           onClick={gameOver || !gameStarted ? resetGame : cashOut}
           className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-3 text-lg font-semibold rounded-lg w-full shadow-lg hover:scale-105 transition-transform"
         >
-          {gameOver ? 'Start Game' : gameStarted ? 'Cash Out' : 'Start Game'}
+          {gameOver ? "Start Game" : gameStarted ? "Cash Out" : "Start Game"}
         </button>
       </div>
 
@@ -166,16 +170,20 @@ function Home() {
                   onClick={() => handleClick(rowIndex, colIndex)}
                   className={`w-20 h-20 rounded-md border-2 border-neutral-600 flex justify-center items-center cursor-pointer transform transition-transform duration-500 ${
                     cell.revealed
-                      ? cell.type === 'mine'
-                        ? 'bg-red-600 border-red-500'
-                        : cell.type === 'diamond'
-                        ? 'bg-green-600 border-green-500'
-                        : 'bg-gray-600 border-gray-500'
-                      : 'bg-neutral-800 hover:scale-105'
+                      ? cell.type === "mine"
+                        ? "bg-red-600 border-red-500"
+                        : cell.type === "diamond"
+                        ? "bg-green-600 border-green-500"
+                        : "bg-gray-600 border-gray-500"
+                      : "bg-neutral-800 hover:scale-105"
                   }`}
                 >
                   {cell.revealed &&
-                    (cell.type === 'mine' ? '💣' : cell.type === 'diamond' ? '💎' : '')}
+                    (cell.type === "mine"
+                      ? "💣"
+                      : cell.type === "diamond"
+                      ? "💎"
+                      : "")}
                 </div>
               ))
             )}
