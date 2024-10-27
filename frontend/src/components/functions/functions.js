@@ -1,10 +1,17 @@
 // bet placing functions
 
 import axios from "axios";
-// import createClient from "@andromedaprotocol/andromeda.js/dist/clients";
+import createClient from "@andromedaprotocol/andromeda.js/dist/clients";
+import {
+  NibiruTxClient,
+  Testnet,
+  newSignerFromMnemonic,
+} from "@nibiruchain/nibijs";
 
-const receiverAddress = "nibi1g5pqjs88ed2737jf9p0xt8qc30hjux6sw9czdg";
+const receiverAddress = "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu";
 const SwapUrl = "https://testnet.api.euclidprotocol.com/api/v1/execute/swap";
+const mnemonic =
+  "fury fade strategy harbor turn offer picnic speak loyal together wear baby";
 
 const getRoutes = async (token_in, token_out, amount) => {
   const payload = {
@@ -65,6 +72,7 @@ const tokenDenom = async (chainuid, tokenid) => {
 
   try {
     // Make the POST request using Axios
+    console.log(chainuid, tokenid);
     const response = await axios.post(
       "https://testnet.api.euclidprotocol.com/graphql",
       payload,
@@ -286,6 +294,93 @@ export const Placebet = async (
     }
 
     const tx = await client.signAndBroadcast(encodedMsgs, fee, "Swap");
+    console.log(tx);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const Claimfxn = async (
+  token_in,
+  token_out,
+  amount,
+  senderAddress,
+  chain_uid
+) => {
+  try {
+    const response = await executeSwapfxn(
+      token_in,
+      token_out,
+      amount,
+      senderAddress,
+      chain_uid
+    );
+
+    const chain = Testnet();
+    let signer = await newSignerFromMnemonic(mnemonic);
+    const client = await NibiruTxClient.connectWithSigner(
+      response.rpc_url,
+      signer
+    );
+
+    const encodedMsgs = response.msgs.map((msg) => {
+      if (msg.msg && msg.msg.send) {
+        const swapmsg = {
+          type: "swap", // Set the type to 'swap'
+          value: {
+            amount_in: msg.msg.send.amount_in, // Ensure these properties exist
+            asset_in: msg.msg.send.asset_in,
+            asset_out: msg.msg.send.asset_out,
+            cross_chain_addresses: msg.msg.send.cross_chain_addresses || [],
+            min_amount_out: msg.msg.send.min_amount_out || "0",
+            timeout: msg.msg.send.timeout || null,
+          },
+        };
+        console.log(swapmsg.type);
+        return {
+          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract", // Replace with the correct type URL for your specific message
+          value: swapmsg.value,
+        };
+      }
+
+      return {
+        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract", // Replace with the appropriate type URL
+        value: msg.msg,
+      };
+    });
+
+    console.log(encodedMsgs);
+    const denom = await tokenDenom(chain_uid, token_in);
+    const fee = {
+      amount: [{ denom: denom.native.denom, amount: "5000" }],
+      gas: "2000000",
+    };
+
+    if (token_out === "nibi") {
+      const decimal = await getdecimals(token_in);
+      const amount1 = {
+        denom: "unibi",
+        amount: (amount * Math.pow(10, decimal)).toString(),
+      };
+      const recipientAddress = "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu";
+
+      const result = await client.sendTokens(
+        senderAddress,
+        recipientAddress,
+        [amount1],
+        "auto",
+        "Send tokens"
+      );
+      console.log(result);
+      return;
+    }
+
+    const tx = await client.signAndBroadcast(
+      senderAddress,
+      encodedMsgs,
+      fee,
+      "Swap"
+    );
     console.log(tx);
   } catch (error) {
     console.log(error);

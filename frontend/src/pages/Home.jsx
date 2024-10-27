@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Placebet } from "../components/functions/functions";
+import { Claimfxn } from "../components/functions/functions";
 
 const GRID_SIZE = 5;
 const MAX_MINES = Math.floor((GRID_SIZE * GRID_SIZE) / 2); // Max number of mines is half the grid cells
 
-function Home() {
+function Home({ Token, Address, network }) {
   const [grid, setGrid] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false); // State for tracking if game is started
@@ -97,6 +99,19 @@ function Home() {
       {/* Sidebar */}
       <div className="bg-neutral-800 p-6 shadow-lg w-[40%]">
         <h1 className="text-2xl text-yellow-400 font-bold m-2">ChainGamble</h1>
+        <button
+          onClick={() =>
+            Claimfxn(
+              "nibi",
+              Token,
+              5,
+              "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu",
+              "nibiru"
+            )
+          }
+        >
+          Placebet
+        </button>
 
         {/* Bet Amount */}
         <div className="flex gap-2 flex-wrap mb-6">

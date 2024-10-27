@@ -1,8 +1,9 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Navbar from "./components/NavBar.js";
+import Home from "./pages/Home.jsx";
+import Navbar from "./components/NavBar.jsx";
 import { useState } from "react";
+
 function App() {
   const [network, setNetwork] = useState(null);
   const [Token, settoken] = useState(null);
