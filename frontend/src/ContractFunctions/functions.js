@@ -49,6 +49,9 @@ async function getSessionWithPublicKey(player) {
 
 // Starting game for a new player and recording his session
 async function placeBet(amount, player, mines) {
+  console.log("running");
+  
+  try{
   const { txClient } = await setup();
   const executeMsg = {
     place_bet: {
@@ -65,6 +68,14 @@ async function placeBet(amount, player, mines) {
   );
 
   console.log("Place Bet Result:", result);
+  return true;
+}
+
+  catch(err){
+    
+    console.log(err);
+    return false;
+  }
 }
 
 //Getting result for whether player won or lost the game
@@ -101,6 +112,7 @@ async function resolveGame(player, number) {
   }
 
   console.log("Game Result Value:", resultValue);
+  return resultValue;
 }
 
 // Getting amount won by the player on ending session
@@ -137,6 +149,7 @@ async function claimWinning(player) {
   }
 
   console.log("Game Result Value:", resultValue);
+  return resultValue;
 }
 
 // Example API calls
@@ -147,7 +160,7 @@ async function claimWinning(player) {
 // placeBet(10000, "nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", 10).catch(
 //   console.error
 // );
-// resolveGame("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", "1").catch(
+// resolveGame("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", "100000000000000000000").catch(
 //   console.error
 // );
 // claimWinning("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(

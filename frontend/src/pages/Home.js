@@ -1,83 +1,96 @@
 import React, { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
+// import { placeBet, resolveGame, claimWinning,getSessionWithPublicKey } from "../ContractFunctions/functions";
+const placeBet=()=>{
+  return true
+};
+const resolveGame=()=>{
+  return "win"
+};
+const claimWinning=()=>{
+  return "1.75x"
+};
+//dummy function , will use the correct funtion when all the bugs will be fixed
+const cashit = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2000);
+  });
+}
+const getSessionWithPublicKey=()=>{};
 
 const GRID_SIZE = 5;
-const MAX_MINES = Math.floor((GRID_SIZE * GRID_SIZE) / 2); // Max number of mines is half the grid cells
+const MAX_MINES = 25;
 
 function Home() {
   const [grid, setGrid] = useState([]);
   const [gameOver, setGameOver] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false); // State for tracking if game is started
+  const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
-  const [numMines, setNumMines] = useState(1); // State for number of mines (and diamonds)
+  const [numMines, setNumMines] = useState(1);
+  const [betAmount, setBetAmount] = useState(0);
 
   const generateGrid = () => {
     const newGrid = Array(GRID_SIZE)
       .fill(null)
       .map(() => Array(GRID_SIZE).fill({ type: "empty", revealed: false }));
-
-    let mineCount = 0;
-    let diamondCount = 0;
-
-    // Randomly place mines
-    while (mineCount < numMines) {
-      const x = Math.floor(Math.random() * GRID_SIZE);
-      const y = Math.floor(Math.random() * GRID_SIZE);
-
-      if (newGrid[x][y].type === "empty") {
-        newGrid[x][y] = { type: "mine", revealed: false };
-        mineCount++;
-      }
-    }
-
-    // Randomly place diamonds (equal to mines)
-    while (diamondCount < numMines) {
-      const x = Math.floor(Math.random() * GRID_SIZE);
-      const y = Math.floor(Math.random() * GRID_SIZE);
-
-      if (newGrid[x][y].type === "empty") {
-        newGrid[x][y] = { type: "diamond", revealed: false };
-        diamondCount++;
-      }
-    }
-
     setGrid(newGrid);
   };
 
   useEffect(() => {
     if (gameStarted) {
-      generateGrid(); // Regenerate grid when game starts
+      generateGrid();
     }
-  }, [numMines, gameStarted]);
+  }, [gameStarted]);
 
-  const handleClick = (x, y) => {
+  const handleClick = async (x, y) => {
     if (gameOver || grid[x][y].revealed) return;
+
+    // Placeholder for random number generation
+    const randomNumber = {}; 
+    const playerAddress = window.sessionStorage.getItem("address");
+    const resolveResult = await resolveGame(playerAddress, randomNumber);
 
     const newGrid = grid.map((row, rowIndex) =>
       row.map((cell, colIndex) =>
-        rowIndex === x && colIndex === y ? { ...cell, revealed: true } : cell
+        rowIndex === x && colIndex === y
+          ? {
+              ...cell,
+              revealed: true,
+              type: resolveResult === "win" ? "diamond" : "mine",
+            }
+          : cell
       )
     );
 
     setGrid(newGrid);
 
-    if (newGrid[x][y].type === "mine") {
+    if (resolveResult === "loss") {
       setGameOver(true);
-      setGameStarted(false); // End the game when a mine is revealed
-    } else if (newGrid[x][y].type === "diamond") {
-      setScore(score + 10);
+      setGameStarted(false);
+      toast.error("Game Over! You hit a mine.");
+    } else if (resolveResult === "win") {
+      const playerSession = await getSessionWithPublicKey(playerAddress);
+      const multiplier = playerSession?.multiplier || 1;
+      setScore(score * multiplier);
+      toast.success(`You found a diamond! Current multiplier: x${multiplier}`);
     }
   };
 
-  const resetGame = () => {
-    setGameOver(false);
-    setScore(0);
-    setGameStarted(true); // Set game as started when resetting
-    generateGrid();
-  };
 
-  const cashOut = () => {
-    // Handle cash out logic here (like saving the score, ending the game early, etc.)
-    setGameStarted(false); // End the game when cashing out
+
+  const cashOut = async () => {
+    const address = window.sessionStorage.getItem("address");
+    const amount = await claimWinning(address);
+    toast.promise(cashit(2), {
+      loading: "Cashing out...",
+      success: `You have cashed out ${amount}!`,
+      error: "Error cashing out",
+    });
+    setGameStarted(false);
+    setBetAmount(0);
+    setNumMines(1);
   };
 
   const increaseMines = () => {
@@ -92,34 +105,76 @@ function Home() {
     }
   };
 
+  const StartGame = () => {
+    if (betAmount === 0) {
+      toast.error("Please enter the bet amount");
+      return;
+    }
+    console.log(betAmount);
+    
+    setGameStarted(true);
+    generateGrid();
+  };
+
+  const handlePlaceBet = async () => {
+    const userAddress = window.sessionStorage.getItem("address");
+    const chainId = window.sessionStorage.getItem("chain_id");
+    if(!userAddress|| userAddress==="" || !chainId || chainId===""){
+      toast.error("Please connect your wallet");
+      return;
+    }
+    if (betAmount === 0) {
+      toast.error("Please enter the bet amount");
+      return;
+    }
+    if (!userAddress || !window.sessionStorage.getItem("chain_id")) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+    const placeBetRes = await placeBet(betAmount, userAddress, numMines);
+    if (placeBetRes) {
+      toast.success("Bet placed successfully. You can start the game now.");
+      setGameStarted(true);
+    } else {
+      toast.error("Error placing bet");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-900 flex">
+      <Toaster />
       {/* Sidebar */}
-      <div className="bg-neutral-800 p-6 shadow-lg w-[40%]">
-        <h1 className="text-2xl text-yellow-400 font-bold m-2">ChainGamble</h1>
+      <div className="bg-neutral-800 p-6 shadow-lg w-[40%] space-y-6">
+        <h1 className="text-3xl text-yellow-400 font-bold">ChainGamble</h1>
 
         {/* Bet Amount */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          <div>
-            <span className="block text-white mb-2">Bet Amount</span>
-            <div className="flex items-center space-x-4">
-              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">
-                Min
-              </button>
-              <input
-                type="text"
-                className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
-              />
-              <button className="bg-gray-700 text-white px-4 py-2 rounded-lg">
-                Max
-              </button>
-            </div>
+        <div className="space-y-2">
+          <span className="block text-white text-lg font-semibold">Bet Amount</span>
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setBetAmount(1)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+              Min
+            </button>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
+              className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
+            />
+            <button onClick={() => setBetAmount(100)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+              Max
+            </button>
           </div>
+          <button
+            onClick={handlePlaceBet}
+            className="bg-gradient-to-r from-green-500 to-blue-500 text-white py-2 px-4 rounded-lg w-full shadow-lg hover:scale-105 transition-transform"
+          >
+            Place Bet
+          </button>
         </div>
 
         {/* Mines Selector */}
-        <div className="mb-6">
-          <span className="block text-white mb-2">Mines (Diamonds)</span>
+        <div className="space-y-2">
+          <span className="block text-white text-lg font-semibold">Mines (Diamonds)</span>
           <div className="flex items-center space-x-4">
             <button
               onClick={decreaseMines}
@@ -143,8 +198,8 @@ function Home() {
         </div>
 
         {/* Score */}
-        <div className="mb-6">
-          <span className="block text-white">Score</span>
+        <div className="space-y-2">
+          <span className="block text-white text-lg font-semibold">Score</span>
           <div className="flex items-center">
             <span className="text-3xl text-yellow-400 font-bold">{score}</span>
           </div>
@@ -152,11 +207,12 @@ function Home() {
 
         {/* Start Game or Cash Out Button */}
         <button
-          onClick={gameOver || !gameStarted ? resetGame : cashOut}
+          onClick={gameStarted ? cashOut : StartGame} // Conditional function call
           className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-3 text-lg font-semibold rounded-lg w-full shadow-lg hover:scale-105 transition-transform"
         >
-          {gameOver ? "Start Game" : gameStarted ? "Cash Out" : "Start Game"}
+          {gameStarted ? "Cash Out" : "Start Game"}
         </button>
+         
       </div>
 
       {/* Game Grid */}

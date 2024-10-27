@@ -1,7 +1,7 @@
 // bet placing functions
 
 import axios from "axios";
-// import createClient from "@andromedaprotocol/andromeda.js/dist/clients";
+import createClient from "@andromedaprotocol/andromeda.js/dist/clients";
 
 const receiverAddress = "nibi1g5pqjs88ed2737jf9p0xt8qc30hjux6sw9czdg";
 const SwapUrl = "https://testnet.api.euclidprotocol.com/api/v1/execute/swap";
