@@ -1,6 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Placebet } from "../components/functions/functions";
-import { Claimfxn } from "../components/functions/functions";
+import toast, { Toaster } from "react-hot-toast";
+import { Placebet, Claimfxn } from "../components/functions/functions";
+// import { placeBet, resolveGame, claimWinning,getSessionWithPublicKey } from "../ContractFunctions/functions";
+const placeBet = () => {
+  return true;
+};
+const resolveGame = () => {
+  return "win";
+};
+const claimWinning = () => {
+  return "1.75x";
+};
+//dummy function , will use the correct funtion when all the bugs will be fixed
+const cashit = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2000);
+  });
+};
+const getSessionWithPublicKey = () => {};
 
 const GRID_SIZE = 5;
 const MAX_MINES = 25;
@@ -30,7 +49,7 @@ function Home({ Token, Address, network }) {
     if (gameOver || grid[x][y].revealed) return;
 
     // Placeholder for random number generation
-    const randomNumber = {}; 
+    const randomNumber = {};
     const playerAddress = window.sessionStorage.getItem("address");
     const resolveResult = await resolveGame(playerAddress, randomNumber);
 
@@ -59,8 +78,6 @@ function Home({ Token, Address, network }) {
       toast.success(`You found a diamond! Current multiplier: x${multiplier}`);
     }
   };
-
-
 
   const cashOut = async () => {
     const address = window.sessionStorage.getItem("address");
@@ -93,7 +110,7 @@ function Home({ Token, Address, network }) {
       return;
     }
     console.log(betAmount);
-    
+
     setGameStarted(true);
     generateGrid();
   };
@@ -101,7 +118,7 @@ function Home({ Token, Address, network }) {
   const handlePlaceBet = async () => {
     const userAddress = window.sessionStorage.getItem("address");
     const chainId = window.sessionStorage.getItem("chain_id");
-    if(!userAddress|| userAddress==="" || !chainId || chainId===""){
+    if (!userAddress || userAddress === "" || !chainId || chainId === "") {
       toast.error("Please connect your wallet");
       return;
     }
@@ -126,27 +143,19 @@ function Home({ Token, Address, network }) {
     <div className="min-h-screen bg-neutral-900 flex">
       <Toaster />
       {/* Sidebar */}
-      <div className="bg-neutral-800 p-6 shadow-lg w-[40%]">
-        <h1 className="text-2xl text-yellow-400 font-bold m-2">ChainGamble</h1>
-        <button
-          onClick={() =>
-            Claimfxn(
-              "nibi",
-              Token,
-              5,
-              "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu",
-              "nibiru"
-            )
-          }
-        >
-          Placebet
-        </button>
+      <div className="bg-neutral-800 p-6 shadow-lg w-[40%] space-y-6">
+        <h1 className="text-3xl text-yellow-400 font-bold">ChainGamble</h1>
 
         {/* Bet Amount */}
         <div className="space-y-2">
-          <span className="block text-white text-lg font-semibold">Bet Amount</span>
+          <span className="block text-white text-lg font-semibold">
+            Bet Amount
+          </span>
           <div className="flex items-center space-x-4">
-            <button onClick={() => setBetAmount(1)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+            <button
+              onClick={() => setBetAmount(1)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
               Min
             </button>
             <input
@@ -155,7 +164,10 @@ function Home({ Token, Address, network }) {
               onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
               className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
             />
-            <button onClick={() => setBetAmount(100)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+            <button
+              onClick={() => setBetAmount(100)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
               Max
             </button>
           </div>
@@ -169,7 +181,9 @@ function Home({ Token, Address, network }) {
 
         {/* Mines Selector */}
         <div className="space-y-2">
-          <span className="block text-white text-lg font-semibold">Mines (Diamonds)</span>
+          <span className="block text-white text-lg font-semibold">
+            Mines (Diamonds)
+          </span>
           <div className="flex items-center space-x-4">
             <button
               onClick={decreaseMines}
@@ -207,7 +221,6 @@ function Home({ Token, Address, network }) {
         >
           {gameStarted ? "Cash Out" : "Start Game"}
         </button>
-         
       </div>
 
       {/* Game Grid */}

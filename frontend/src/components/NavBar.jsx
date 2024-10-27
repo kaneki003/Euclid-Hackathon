@@ -1,8 +1,4 @@
-import {
-  Disclosure,
-  Menu,
-  Transition,
-} from "@headlessui/react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { useState, Fragment } from "react";
@@ -98,7 +94,10 @@ export default function Navbar({
   };
 
   return (
-    <Disclosure as="nav" className="bg-neutral-800 text-white sticky top-0 w-full z-10 shadow-md">
+    <Disclosure
+      as="nav"
+      className="bg-neutral-800 text-white sticky top-0 w-full z-10 shadow-md"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -182,7 +181,9 @@ export default function Navbar({
               <Avatar src={network.logo} className="mr-3" />
               <div>
                 <p className="text-white font-semibold">{network.chain_uid}</p>
-                <p className="text-gray-400 text-sm">Chain ID: {network.chain_id}</p>
+                <p className="text-gray-400 text-sm">
+                  Chain ID: {network.chain_id}
+                </p>
               </div>
             </div>
           ))}

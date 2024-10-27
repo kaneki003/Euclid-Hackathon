@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,15 +12,18 @@
   },
   "dependencies": {
     "@andromedaprotocol/andromeda.js": "^2.0.0-beta.2",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "^0.32.4",
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
-    "@headlessui/react": "^2.1.10",
-    "@heroicons/react": "^2.1.5",
     "@nibiruchain/nibijs": "^5.0.2",
+    "@terra-money/terra.js": "^3.1.10",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
     "antd": "^5.21.5",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
@@ -31,7 +35,9 @@
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.27.0",
-    "tailwindcss": "^3.4.13"
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.13",
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

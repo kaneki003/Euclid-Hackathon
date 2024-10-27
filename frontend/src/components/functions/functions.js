@@ -8,7 +8,14 @@ import {
   newSignerFromMnemonic,
 } from "@nibiruchain/nibijs";
 
-const receiverAddress = "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu";
+import { Registry } from "@cosmjs/proto-signing";
+import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
+
+const commonAddress = "nibi1g5pqjs88ed2737jf9p0xt8qc30hjux6sw9czdg";
+const commonadd_chain_uid = "nibiru";
+const common_token_id = "nibi";
+const commonadd_chain_id = "nibiru-testnet-1";
+const commonadd_rpc_url = "https://rpc.testnet-1.nibiru.fi";
 const SwapUrl = "https://testnet.api.euclidprotocol.com/api/v1/execute/swap";
 const mnemonic =
   "fury fade strategy harbor turn offer picnic speak loyal together wear baby";
@@ -181,7 +188,9 @@ const executeSwapfxn = async (
   token_out,
   amount,
   senderAddress,
-  chainuid
+  receiverAddr,
+  chainuid,
+  recever_chainuid
 ) => {
   const Swaproutes = await getRoutes(token_in, token_out, amount.toString());
   const headers = {
@@ -201,8 +210,8 @@ const executeSwapfxn = async (
       {
         limit: null,
         user: {
-          address: receiverAddress,
-          chain_uid: "nibiru",
+          address: receiverAddr,
+          chain_uid: recever_chainuid,
         },
       },
     ],
@@ -221,20 +230,16 @@ const executeSwapfxn = async (
   return response.data;
 };
 
-export const Placebet = async (
-  token_in,
-  token_out,
-  amount,
-  senderAddress,
-  network
-) => {
+export const Placebet = async (token_in, amount, senderAddress, network) => {
   try {
     const response = await executeSwapfxn(
       token_in,
-      token_out,
+      common_token_id,
       amount,
       senderAddress,
-      network.chain_uid
+      commonAddress,
+      network.chain_uid,
+      commonadd_chain_uid
     );
     const Prefixaddres = await prefixaddress(network.chain_uid);
     const offlineSigner = window.leap.getOfflineSigner(network.chain_id);
@@ -281,10 +286,9 @@ export const Placebet = async (
         denom: "unibi",
         amount: (amount * Math.pow(10, decimal)).toString(),
       };
-      const recipientAddress = "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu";
 
       const result = await client.sendTokens(
-        recipientAddress,
+        commonAddress,
         [amount1],
         fee,
         "Send tokens"
@@ -300,27 +304,33 @@ export const Placebet = async (
   }
 };
 
-export const Claimfxn = async (
-  token_in,
-  token_out,
-  amount,
-  senderAddress,
-  chain_uid
-) => {
+export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
   try {
     const response = await executeSwapfxn(
-      token_in,
+      common_token_id,
       token_out,
       amount,
-      senderAddress,
+      commonAddress,
+      receiverAddr,
+      commonadd_chain_uid,
       chain_uid
     );
+    const Prefixaddres = await prefixaddress(commonadd_chain_uid);
+    const offlineSigner = window.leap.getOfflineSigner(commonadd_chain_id);
+    const client1 = createClient(Prefixaddres);
+    await client1.connect(commonadd_rpc_url, offlineSigner);
 
+    const registry = new Registry();
+    registry.register(
+      "/cosmwasm.wasm.v1.MsgExecuteContract",
+      MsgExecuteContract
+    );
     const chain = Testnet();
     let signer = await newSignerFromMnemonic(mnemonic);
     const client = await NibiruTxClient.connectWithSigner(
-      response.rpc_url,
-      signer
+      commonadd_rpc_url,
+      signer,
+      { registry }
     );
 
     const encodedMsgs = response.msgs.map((msg) => {
@@ -331,42 +341,36 @@ export const Claimfxn = async (
             amount_in: msg.msg.send.amount_in, // Ensure these properties exist
             asset_in: msg.msg.send.asset_in,
             asset_out: msg.msg.send.asset_out,
+            // Include any other necessary fields that the swap requires
             cross_chain_addresses: msg.msg.send.cross_chain_addresses || [],
             min_amount_out: msg.msg.send.min_amount_out || "0",
             timeout: msg.msg.send.timeout || null,
           },
         };
         console.log(swapmsg.type);
-        return {
-          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract", // Replace with the correct type URL for your specific message
-          value: swapmsg.value,
-        };
+        // Encode the swap message
+        return client1.encodeExecuteMsg(msg.contractAddress, swapmsg, [
+          ...(msg.funds || []),
+        ]);
       }
 
-      return {
-        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract", // Replace with the appropriate type URL
-        value: msg.msg,
-      };
+      // If the msg is not of type 'send', encode as is
+      return client1.encodeExecuteMsg(msg.contractAddress, msg.msg, [
+        ...(msg.funds || []),
+      ]);
     });
 
     console.log(encodedMsgs);
-    const denom = await tokenDenom(chain_uid, token_in);
-    const fee = {
-      amount: [{ denom: denom.native.denom, amount: "5000" }],
-      gas: "2000000",
-    };
 
     if (token_out === "nibi") {
-      const decimal = await getdecimals(token_in);
+      const decimal = await getdecimals(common_token_id);
       const amount1 = {
         denom: "unibi",
         amount: (amount * Math.pow(10, decimal)).toString(),
       };
-      const recipientAddress = "nibi1ee4egg3hnvu930sphvwq9kesrc9u52fftexxpu";
-
       const result = await client.sendTokens(
-        senderAddress,
-        recipientAddress,
+        commonAddress,
+        receiverAddr,
         [amount1],
         "auto",
         "Send tokens"
@@ -376,9 +380,9 @@ export const Claimfxn = async (
     }
 
     const tx = await client.signAndBroadcast(
-      senderAddress,
+      commonAddress,
       encodedMsgs,
-      fee,
+      "auto",
       "Swap"
     );
     console.log(tx);
