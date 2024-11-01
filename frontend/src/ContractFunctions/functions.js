@@ -6,7 +6,7 @@ import {
 
 // // Access environment variables for Vite
 const mnemonic = import.meta.env.VITE_MNEMONIC;
-const contractAddress =import.meta.env.VITE_CONTRACT_ADDRESS;
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 async function setup() {
   const chain = Testnet();
@@ -51,29 +51,25 @@ export async function getSessionWithPublicKey(player) {
 
 // Starting game for a new player and recording his session
 export async function placeBet(amount, player, mines) {
-  
-  try{
-  const { txClient } = await setup();
-  const executeMsg = {
-    place_bet: {
-      amount: amount.toString(),
-      player: player,
-      mines: mines.toString(),
-    },
-  };
-  const result = await txClient.wasmClient.execute(
-    "nibi1dl8l47asjs9jt3rzu9exs2alpr0fhtnf4nk9s2",
-    contractAddress,
-    executeMsg,
-    "auto"
-  );
+  try {
+    const { txClient } = await setup();
+    const executeMsg = {
+      place_bet: {
+        amount: amount.toString(),
+        player: player,
+        mines: mines.toString(),
+      },
+    };
+    const result = await txClient.wasmClient.execute(
+      "nibi1dl8l47asjs9jt3rzu9exs2alpr0fhtnf4nk9s2",
+      contractAddress,
+      executeMsg,
+      "auto"
+    );
 
-  console.log("Place Bet Result:", result);
-  return true;
-}
-
-  catch(err){
-    
+    console.log("Place Bet Result:", result);
+    return true;
+  } catch (err) {
     console.log(err);
     return false;
   }
@@ -81,9 +77,9 @@ export async function placeBet(amount, player, mines) {
 
 //Getting result for whether player won or lost the game
 export async function resolveGame(player) {
-  let number=0;
-  for(let i=0;i<8;i++){
-    number=number*10+(Math.floor(Math.random()*10));
+  let number = 0;
+  for (let i = 0; i < 8; i++) {
+    number = number * 10 + Math.floor(Math.random() * 10);
   }
   console.log(number);
 

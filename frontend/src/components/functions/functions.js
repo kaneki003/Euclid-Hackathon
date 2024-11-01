@@ -11,15 +11,14 @@ import {
 import { Registry } from "@cosmjs/proto-signing";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 
-const commonAddress = "nibi1g5pqjs88ed2737jf9p0xt8qc30hjux6sw9czdg";
+const commonAddress = import.meta.env.VITE_WALLET_ADDRESS;
 
 const commonadd_chain_uid = "nibiru";
 const common_token_id = "nibi";
 const commonadd_chain_id = "nibiru-testnet-1";
 const commonadd_rpc_url = "https://rpc.testnet-1.nibiru.fi";
 const SwapUrl = "https://testnet.api.euclidprotocol.com/api/v1/execute/swap";
-const mnemonic =
-  "fury fade strategy harbor turn offer picnic speak loyal together wear baby";
+const mnemonic = import.meta.env.VITE_MNEMONIC;
 
 const getRoutes = async (token_in, token_out, amount) => {
   const payload = {
@@ -52,7 +51,7 @@ const getRoutes = async (token_in, token_out, amount) => {
 
 const tokenDenom = async (chainuid, tokenid) => {
   console.log(chainuid, tokenid);
-  
+
   const payload = {
     query: `
       query Escrow($chainUid: String!, $tokenId: String) {
@@ -95,10 +94,10 @@ const tokenDenom = async (chainuid, tokenid) => {
 
     const denomData = response.data.data.factory.escrow.denoms[0];
     console.log("Full response data:", JSON.stringify(response.data, null, 2));
-    return denomData; 
+    return denomData;
   } catch (err) {
-    console.error("Error fetching token denom:", err); 
-    return null; 
+    console.error("Error fetching token denom:", err);
+    return null;
   }
 };
 
@@ -194,13 +193,13 @@ const executeSwapfxn = async (
   recever_chainuid
 ) => {
   const Swaproutes = await getRoutes(token_in, token_out, amount.toString());
+  const decimal = await getdecimals(token_in);
+  const denom = await tokenDenom(chainuid, token_in);
   const headers = {
     accept: "application/json",
     "Content-Type": "application/json",
   };
-  const decimal = await getdecimals(token_in);
-  const denom = await tokenDenom(chainuid, token_in);
-  
+
   const body = {
     amount_in: (amount * Math.pow(10, decimal)).toFixed(0), // Convert to integer string
     asset_in: {
@@ -232,11 +231,63 @@ const executeSwapfxn = async (
   return response.data;
 };
 
+const simulateSwap = async (token_in, token_out, amount_in) => {
+  if (token_in == token_out) return amount_in;
+  const Swaproutes = await getRoutes(token_in, token_out, amount_in.toString());
+  const decimal = await getdecimals(token_in);
+  const decimal_out = await getdecimals(token_out);
+  const url = "https://testnet.api.euclidprotocol.com/graphql";
+  const payload = {
+    query: `
+      query Simulate_swap($assetIn: String!, $amountIn: String!, $assetOut: String!, $minAmountOut: String!, $swaps: [String!]) {
+        router {
+          simulate_swap(
+            asset_in: $assetIn,
+            amount_in: $amountIn,
+            asset_out: $assetOut,
+            min_amount_out: $minAmountOut,
+            swaps: $swaps
+          ) {
+            amount_out
+            asset_out
+          }
+        }
+      }
+    `,
+    variables: {
+      assetIn: token_in,
+      amountIn: (amount_in * Math.pow(10, decimal)).toFixed(0),
+      assetOut: token_out,
+      minAmountOut: "1",
+      swaps: Swaproutes,
+    },
+  };
+
+  try {
+    const response = await axios.post(url, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(
+      "Simulate Swap Response:",
+      response.data.data.router.simulate_swap
+    );
+    return (
+      Number(response.data.data.router.simulate_swap.amount_out) /
+      Math.pow(10, decimal_out)
+    );
+  } catch (error) {
+    console.error("Error in simulateSwap:", error);
+    throw error;
+  }
+};
 
 export const Placebet = async (token_in, amount, senderAddress, network) => {
   try {
-    console.log("trying",token_in,amount,senderAddress,network.chain_uid);
-    
+    console.log("trying", token_in, amount, senderAddress, network.chain_uid);
+
     const response = await executeSwapfxn(
       token_in,
       common_token_id,
@@ -292,7 +343,6 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
         amount: (amount * Math.pow(10, decimal)).toString(),
       };
 
-
       const result = await client.sendTokens(
         commonAddress,
         [amount1],
@@ -300,9 +350,9 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
         "Send tokens"
       );
       console.log(result);
-      return;
+      return true;
     }
-    
+
     const tx = await client.signAndBroadcast(encodedMsgs, fee, "Swap");
     console.log(tx);
     return true;
@@ -314,19 +364,24 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
 
 export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
   try {
+    const giving_amount = await simulateSwap(
+      token_out,
+      common_token_id,
+      amount
+    );
+    console.log(giving_amount);
+
     const response = await executeSwapfxn(
       common_token_id,
       token_out,
-      amount,
+      giving_amount,
       commonAddress,
       receiverAddr,
       commonadd_chain_uid,
       chain_uid
     );
     const Prefixaddres = await prefixaddress(commonadd_chain_uid);
-    const offlineSigner = window.leap.getOfflineSigner(commonadd_chain_id);
     const client1 = createClient(Prefixaddres);
-    await client1.connect(commonadd_rpc_url, offlineSigner);
 
     const registry = new Registry();
     registry.register(
@@ -335,6 +390,7 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
     );
     const chain = Testnet();
     let signer = await newSignerFromMnemonic(mnemonic);
+    await client1.connect(commonadd_rpc_url, signer);
     const client = await NibiruTxClient.connectWithSigner(
       commonadd_rpc_url,
       signer,
@@ -366,14 +422,14 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
       return client1.encodeExecuteMsg(msg.contractAddress, msg.msg, [
         ...(msg.funds || []),
       ]);
-    });    
+    });
     if (token_out === "nibi") {
       const decimal = await getdecimals(common_token_id);
       const amount1 = {
         denom: "unibi",
         amount: (amount * Math.pow(10, decimal)).toString(),
       };
-      
+
       const result = await client.sendTokens(
         commonAddress,
         receiverAddr,
@@ -381,13 +437,13 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
         "auto",
         "Send tokens"
       );
-      
+
       console.log(result);
-      return;
+      return true;
     }
     // console.log(encodedMsgs,token_out);
-    
-    console.log("testup,signupbroadcast",encodedMsgs,commonAddress);
+
+    console.log("testup,signupbroadcast", encodedMsgs, commonAddress);
 
     const tx = await client.signAndBroadcast(
       commonAddress,

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { claimWinning, resolveGame, placeBet, getSessionWithPublicKey } from "../ContractFunctions/functions.js";
+import {
+  claimWinning,
+  resolveGame,
+  placeBet,
+  getSessionWithPublicKey,
+} from "../ContractFunctions/functions.js";
 import { Placebet, Claimfxn } from "../components/functions/functions.js";
 
 const GRID_SIZE = 5;
@@ -69,11 +74,15 @@ function Home({ Token, network, Address }) {
       } else {
         const playerSession = await getSessionWithPublicKey(playerAddress);
         const currentMultiplier = playerSession?.multiplier || 1;
-        
+
         setScore((prevScore) => prevScore * currentMultiplier);
         setMultiplier(currentMultiplier); // Update multiplier state
         setDiamondCount((prev) => prev + 1); // Increment diamond count
-        toast.success(`You found a diamond! Multiplier: x${(currentMultiplier/100000000).toFixed(2)}`);
+        toast.success(
+          `You found a diamond! Multiplier: x${(
+            currentMultiplier / 100000000
+          ).toFixed(2)}`
+        );
       }
     } catch (error) {
       toast.error("Error resolving game");
@@ -151,7 +160,12 @@ function Home({ Token, network, Address }) {
       let placeBetRes1 = false;
       await toast.promise(
         (async () => {
-          const placeBetRes1 = await Placebet(token_in, betAmount, userAddress, network);
+          const placeBetRes1 = await Placebet(
+            token_in,
+            betAmount,
+            userAddress,
+            network
+          );
           const placeBetRes = await placeBet(betAmount, userAddress, numMines);
 
           if (!placeBetRes1) {
@@ -167,7 +181,10 @@ function Home({ Token, network, Address }) {
         {
           loading: "Placing bet...",
           success: (message) => message,
-          error: placeBetRes1 === false ? "Bet Request rejected" : "Error placing bet",
+          error:
+            placeBetRes1 === false
+              ? "Bet Request rejected"
+              : "Error placing bet",
         }
       );
     } catch (error) {
@@ -180,22 +197,36 @@ function Home({ Token, network, Address }) {
       <Toaster />
       {/* Sidebar */}
       <div className="bg-neutral-800 p-6 shadow-lg h-[90vh] w-full lg:w-1/3 space-y-6  lg:mb-0">
-        <h1 className="text-3xl text-yellow-400 font-bold text-center lg:text-left">ChainGamble</h1>
+        <h1 className="text-3xl text-yellow-400 font-bold text-center lg:text-left">
+          ChainGamble
+        </h1>
 
         {/* Bet Amount */}
         <div className="space-y-2 ">
-          <span className="block text-white text-xl font-semibold">Bet Amount</span>
+          <span className="block text-white text-xl font-semibold">
+            Bet Amount
+          </span>
           <div className="flex gap-2 flex-wrap md:justify-between justify-center">
             <div>
               <div className="items-center space-x-2">
-                <button onClick={() => setBetAmount(1)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Min</button>
+                <button
+                  onClick={() => setBetAmount(1)}
+                  className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+                >
+                  Min
+                </button>
                 <input
                   type="number"
                   value={betAmount}
                   onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
                   className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
                 />
-                <button onClick={() => setBetAmount(100)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Max</button>
+                <button
+                  onClick={() => setBetAmount(100)}
+                  className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+                >
+                  Max
+                </button>
               </div>
             </div>
             <button
@@ -209,16 +240,28 @@ function Home({ Token, network, Address }) {
 
         {/* Mines Selector */}
         <div className="space-y-2">
-          <span className="block text-white text-xl font-semibold">Mines (Diamonds)</span>
+          <span className="block text-white text-xl font-semibold">
+            Mines (Diamonds)
+          </span>
           <div className="flex items-center space-x-2">
-            <button onClick={decreaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">-</button>
+            <button
+              onClick={decreaseMines}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              -
+            </button>
             <input
               type="text"
               value={numMines}
               className="text-center bg-gray-700 text-white w-20 py-2 rounded-lg"
               readOnly
             />
-            <button onClick={increaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">+</button>
+            <button
+              onClick={increaseMines}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              +
+            </button>
           </div>
         </div>
 
@@ -227,7 +270,9 @@ function Home({ Token, network, Address }) {
           <span className="block text-white text-lg font-semibold">Score</span>
           <div className="flex items-center justify-center lg:justify-start space-x-4">
             <span className="text-2xl text-yellow-400 font-bold">{score}</span>
-            <span className="text-xl text-white">Multiplier: x{multiplier/100000000}</span>
+            <span className="text-xl text-white">
+              Multiplier: x{multiplier / 100000000}
+            </span>
           </div>
         </div>
 
@@ -238,7 +283,6 @@ function Home({ Token, network, Address }) {
         >
           {gameStarted ? "Cash Out" : "Start Game"}
         </button>
-
       </div>
 
       {/* Game Grid */}
@@ -259,7 +303,12 @@ function Home({ Token, network, Address }) {
                     : "bg-neutral-800 hover:scale-105"
                 }`}
               >
-                {cell.revealed && (cell.type === "mine" ? "💣" : cell.type === "diamond" ? "💎" : "")}
+                {cell.revealed &&
+                  (cell.type === "mine"
+                    ? "💣"
+                    : cell.type === "diamond"
+                    ? "💎"
+                    : "")}
               </div>
             ))
           )}
