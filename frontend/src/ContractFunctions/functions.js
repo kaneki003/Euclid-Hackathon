@@ -1,12 +1,12 @@
-const {
+import {
   NibiruTxClient,
   Testnet,
   newSignerFromMnemonic,
-} = require("@nibiruchain/nibijs");
-require("dotenv").config();
+} from "@nibiruchain/nibijs";
 
-const mnemonic = process.env.MNEMONIC;
-const contractAddress = process.env.CONTRACT_ADDRESS;
+// // Access environment variables for Vite
+const mnemonic = import.meta.env.VITE_MNEMONIC;
+const contractAddress =import.meta.env.VITE_CONTRACT_ADDRESS;
 
 async function setup() {
   const chain = Testnet();
@@ -20,7 +20,7 @@ async function setup() {
 }
 
 // Get detail of all players playing currently the game
-async function getAllSessions() {
+export async function getAllSessions() {
   const { txClient } = await setup();
   const queryMsg = { get_active_sessions: {} };
   const querySessions = await txClient.wasmClient.queryContractSmart(
@@ -28,11 +28,12 @@ async function getAllSessions() {
     queryMsg
   );
 
-  console.log("Query Result:", querySessions);
+  // console.log("Query Result:", querySessions);
+  return querySessions;
 }
 
 //Get detail of a particular player with public key
-async function getSessionWithPublicKey(player) {
+export async function getSessionWithPublicKey(player) {
   const { txClient } = await setup();
   const queryMsg = {
     get_player_session: {
@@ -44,12 +45,12 @@ async function getSessionWithPublicKey(player) {
     queryMsg
   );
 
-  console.log("Player Session:", getSession);
+  // console.log("Player Session:", getSession);
+  return getSession;
 }
 
 // Starting game for a new player and recording his session
-async function placeBet(amount, player, mines) {
-  console.log("running");
+export async function placeBet(amount, player, mines) {
   
   try{
   const { txClient } = await setup();
@@ -79,7 +80,13 @@ async function placeBet(amount, player, mines) {
 }
 
 //Getting result for whether player won or lost the game
-async function resolveGame(player, number) {
+export async function resolveGame(player) {
+  let number=0;
+  for(let i=0;i<8;i++){
+    number=number*10+(Math.floor(Math.random()*10));
+  }
+  console.log(number);
+
   const { txClient } = await setup();
   const executeMsg = {
     resolve_game: {
@@ -116,7 +123,7 @@ async function resolveGame(player, number) {
 }
 
 // Getting amount won by the player on ending session
-async function claimWinning(player) {
+export async function claimWinning(player) {
   const { txClient } = await setup();
 
   const executeMsg = {
@@ -148,7 +155,7 @@ async function claimWinning(player) {
     if (resultValue) break;
   }
 
-  console.log("Game Result Value:", resultValue);
+  // console.log("Game Result Value:", resultValue);
   return resultValue;
 }
 
@@ -160,7 +167,7 @@ async function claimWinning(player) {
 // placeBet(10000, "nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", 10).catch(
 //   console.error
 // );
-// resolveGame("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", "100000000000000000000").catch(
+// resolveGame("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(
 //   console.error
 // );
 // claimWinning("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(

@@ -1,8 +1,9 @@
-import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import { useState, Fragment } from "react";
+import { useState } from "react";
 import { Avatar, Modal } from "antd";
+import SideBar from "../components/SideBar"; // Importing SideBar component
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -54,6 +55,8 @@ export default function Navbar({
       );
       const tokens = response.data.data.factory.all_tokens.tokens;
       settokens(tokens);
+      
+      
       return tokens;
     } catch (error) {
       console.error("Error fetching tokens:", error);
@@ -87,6 +90,9 @@ export default function Navbar({
       setAddress(key.bech32Address);
       window.sessionStorage.setItem("address", key.bech32Address);
       window.sessionStorage.setItem("chain_id", network.chain_id);
+      window.sessionStorage.setItem("chain_uid", network.chain_uid);
+      
+
       await window.leap.enable(network.chain_id);
     } catch (error) {
       console.error("Error connecting to Leap Wallet:", error);
@@ -101,7 +107,6 @@ export default function Navbar({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            {/* Mobile menu button */}
             <Disclosure.Button className="inline-flex items-center justify-center p-2 text-gray-400 hover:bg-neutral-700 hover:text-white rounded-md focus:outline-none">
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
@@ -125,13 +130,14 @@ export default function Navbar({
                 Connect
               </button>
             )}
+            {/* Sidebar Button */}
+            <SideBar />
           </div>
         </div>
       </div>
 
       <Disclosure.Panel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
-          {/* Mobile menu items */}
           <Disclosure.Button
             as="button"
             className="w-full text-center block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-neutral-700"
@@ -145,9 +151,12 @@ export default function Navbar({
               ? `${Address.slice(0, 6)}...${Address.slice(-4)}`
               : "Connect"}
           </Disclosure.Button>
+          {/* Sidebar Button in Mobile View */}
+          <SideBar />
         </div>
       </Disclosure.Panel>
 
+      {/* Network Selection Modal */}
       <Modal
         title="Select Network"
         open={isModalOpen}
@@ -190,6 +199,7 @@ export default function Navbar({
         </div>
       </Modal>
 
+      {/* Token Selection Modal */}
       <Modal
         title="Select Token"
         open={isModalOpen2}
@@ -214,7 +224,10 @@ export default function Navbar({
               key={index}
               className="p-4 rounded-lg bg-neutral-700 hover:bg-neutral-600 cursor-pointer flex justify-between items-center"
               onClick={() => {
+                
+                
                 settoken(token);
+                window.sessionStorage.setItem("token", token);
                 setIsModalOpen2(false);
                 connectWallet();
               }}
