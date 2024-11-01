@@ -15,7 +15,6 @@ function Home({ Token, network, Address }) {
   const [grid, setGrid] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [score, setScore] = useState(0);
   const [numMines, setNumMines] = useState(1);
   const [betAmount, setBetAmount] = useState(0);
   const [diamondCount, setDiamondCount] = useState(0); // Track diamond count
@@ -75,7 +74,7 @@ function Home({ Token, network, Address }) {
         const playerSession = await getSessionWithPublicKey(playerAddress);
         const currentMultiplier = playerSession?.multiplier || 1;
 
-        setScore((prevScore) => prevScore * currentMultiplier);
+       
         setMultiplier(currentMultiplier); // Update multiplier state
         setDiamondCount((prev) => prev + 1); // Increment diamond count
         toast.success(
@@ -91,14 +90,18 @@ function Home({ Token, network, Address }) {
   };
 
   const cashOut = async () => {
+    console.log("run");
+    
     const address = window.sessionStorage.getItem("address");
 
     toast.promise(
       (async () => {
-        const amount = score === 0 ? betAmount : await claimWinning(address);
+        const amount = multiplier==1 ? betAmount : await claimWinning(address);
         const userAddress = window.sessionStorage.getItem("address");
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
+        console.log(amount);
+        
 
         const res = await Claimfxn(token_in, amount, userAddress, chanUid);
         if (res) {
@@ -196,10 +199,20 @@ function Home({ Token, network, Address }) {
     <div className="min-h-screen bg-neutral-900 flex flex-col lg:flex-row p-4">
       <Toaster />
       {/* Sidebar */}
-      <div className="bg-neutral-800 p-6 shadow-lg h-[90vh] w-full lg:w-1/3 space-y-6  lg:mb-0">
+      <div className="bg-neutral-800 p-6 shadow-lg h-fit w-full lg:w-1/3 space-y-2  lg:mb-0">
         <h1 className="text-3xl text-yellow-400 font-bold text-center lg:text-left">
           ChainGamble
         </h1>
+        <div className="block text-white text-md font-semibold">
+  Player Address:{" "}
+  {window.sessionStorage.getItem("address")
+    ? `${window.sessionStorage.getItem("address").slice(0, 6)}...${window.sessionStorage.getItem("address").slice(-5)}`
+    : "Not Connected"}
+</div>
+
+          
+
+            
 
         {/* Bet Amount */}
         <div className="space-y-2 ">
@@ -267,12 +280,10 @@ function Home({ Token, network, Address }) {
 
         {/* Score and Multiplier */}
         <div className="space-y-1">
-          <span className="block text-white text-lg font-semibold">Score</span>
+          <span className="block text-white text-lg font-semibold"> Multiplier:</span>
           <div className="flex items-center justify-center lg:justify-start space-x-4">
-            <span className="text-2xl text-yellow-400 font-bold">{score}</span>
-            <span className="text-xl text-white">
-              Multiplier: x{multiplier / 100000000}
-            </span>
+            <span className="text-2xl text-yellow-400 font-bold">x{multiplier / 100000000}</span>
+            
           </div>
         </div>
 

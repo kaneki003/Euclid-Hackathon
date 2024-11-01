@@ -79,7 +79,8 @@ export async function placeBet(amount, player, mines) {
 export async function resolveGame(player) {
   let number = 0;
   for (let i = 0; i < 8; i++) {
-    number = number * 10 + Math.floor(Math.random() * 10);
+    let num=Math.floor(Math.random() * 10);
+    number = number * 10 + num==0?1:num;
   }
   console.log(number);
 
@@ -114,7 +115,7 @@ export async function resolveGame(player) {
     if (resultValue) break;
   }
 
-  console.log("Game Result Value:", resultValue);
+  // console.log("Game Result Value:", resultValue);
   return resultValue;
 }
 
@@ -139,6 +140,7 @@ export async function claimWinning(player) {
   const txResult = await txClient.getTx(txHash);
   const parsedLog = JSON.parse(txResult.rawLog);
 
+  // Check the parsed log for an "amount" attribute
   let resultValue = null;
   for (const entry of parsedLog) {
     for (const event of entry.events) {
@@ -151,9 +153,15 @@ export async function claimWinning(player) {
     if (resultValue) break;
   }
 
-  // console.log("Game Result Value:", resultValue);
-  return resultValue;
+  if (resultValue !== null) {
+    console.log("Winning amount:", resultValue);
+    return parseFloat(resultValue); // Assuming resultValue is numeric
+  } else {
+    console.error("Amount not found in transaction log.");
+    throw new Error("Claim winning failed, amount not found.");
+  }
 }
+
 
 // Example API calls
 // getAllSessions().catch(console.error);
