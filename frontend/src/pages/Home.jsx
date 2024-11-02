@@ -6,7 +6,7 @@ import {
   placeBet,
   getSessionWithPublicKey,
 } from "../ContractFunctions/functions.js";
-import { Placebet, Claimfxn } from "../components/functions/functions.js";
+import { Placebet, Claimfxn } from "../EuclidSwapfunctions/functions.js";
 
 const GRID_SIZE = 5;
 const MAX_MINES = 25;
@@ -74,7 +74,6 @@ function Home({ Token, network, Address }) {
         const playerSession = await getSessionWithPublicKey(playerAddress);
         const currentMultiplier = playerSession?.multiplier || 1;
 
-       
         setMultiplier(currentMultiplier); // Update multiplier state
         setDiamondCount((prev) => prev + 1); // Increment diamond count
         toast.success(
@@ -91,17 +90,17 @@ function Home({ Token, network, Address }) {
 
   const cashOut = async () => {
     console.log("run");
-    
+
     const address = window.sessionStorage.getItem("address");
 
     toast.promise(
       (async () => {
-        const amount = multiplier==1 ? betAmount : await claimWinning(address);
+        const amount =
+          multiplier == 1 ? betAmount : await claimWinning(address);
         const userAddress = window.sessionStorage.getItem("address");
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
         console.log(amount);
-        
 
         const res = await Claimfxn(token_in, amount, userAddress, chanUid);
         if (res) {
@@ -146,10 +145,9 @@ function Home({ Token, network, Address }) {
     const network = {
       chain_uid: window.sessionStorage.getItem("chain_uid"),
       chain_id: chainId,
-      rpc_url: import.meta.env.VITE_JSON_RPC_ENDPOINT,
     };
 
-    if (!userAddress || !chainId || !network.chain_uid || !network.rpc_url) {
+    if (!userAddress || !chainId || !network.chain_uid) {
       toast.error("Please connect your wallet and select a network");
       return;
     }
@@ -204,15 +202,15 @@ function Home({ Token, network, Address }) {
           ChainGamble
         </h1>
         <div className="block text-white text-md font-semibold">
-  Player Address:{" "}
-  {window.sessionStorage.getItem("address")
-    ? `${window.sessionStorage.getItem("address").slice(0, 6)}...${window.sessionStorage.getItem("address").slice(-5)}`
-    : "Not Connected"}
-</div>
-
-          
-
-            
+          Player Address:{" "}
+          {window.sessionStorage.getItem("address")
+            ? `${window.sessionStorage
+                .getItem("address")
+                .slice(0, 6)}...${window.sessionStorage
+                .getItem("address")
+                .slice(-5)}`
+            : "Not Connected"}
+        </div>
 
         {/* Bet Amount */}
         <div className="space-y-2 ">
@@ -280,10 +278,14 @@ function Home({ Token, network, Address }) {
 
         {/* Score and Multiplier */}
         <div className="space-y-1">
-          <span className="block text-white text-lg font-semibold"> Multiplier:</span>
+          <span className="block text-white text-lg font-semibold">
+            {" "}
+            Multiplier:
+          </span>
           <div className="flex items-center justify-center lg:justify-start space-x-4">
-            <span className="text-2xl text-yellow-400 font-bold">x{multiplier / 100000000}</span>
-            
+            <span className="text-2xl text-yellow-400 font-bold">
+              x{multiplier / 100000000}
+            </span>
           </div>
         </div>
 

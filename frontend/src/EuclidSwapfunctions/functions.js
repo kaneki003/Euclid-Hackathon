@@ -427,7 +427,7 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
       const decimal = await getdecimals(common_token_id);
       const amount1 = {
         denom: "unibi",
-        amount: (amount * Math.pow(10, decimal)).toString(),
+        amount: (amount * Math.pow(10, decimal)).toFixed(0),
       };
 
       const result = await client.sendTokens(
