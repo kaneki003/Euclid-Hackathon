@@ -3,6 +3,7 @@ import {
   Testnet,
   newSignerFromMnemonic,
 } from "@nibiruchain/nibijs";
+import crypto from "crypto";
 
 // // Access environment variables for Vite
 const mnemonic = import.meta.env.VITE_MNEMONIC;
@@ -75,13 +76,15 @@ export async function placeBet(amount, player, mines) {
   }
 }
 
+function getSecureRandomInt(max) {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return (array[0] % max) + 1;
+}
+
 //Getting result for whether player won or lost the game
 export async function resolveGame(player) {
-  let number = 0;
-  for (let i = 0; i < 8; i++) {
-    let num=Math.floor(Math.random() * 10);
-    number = number * 10 + num==0?1:num;
-  }
+  let number = getSecureRandomInt(100000000);
   console.log(number);
 
   const { txClient } = await setup();
@@ -161,7 +164,6 @@ export async function claimWinning(player) {
     throw new Error("Claim winning failed, amount not found.");
   }
 }
-
 
 // Example API calls
 // getAllSessions().catch(console.error);

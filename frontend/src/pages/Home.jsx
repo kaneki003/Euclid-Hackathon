@@ -11,7 +11,7 @@ import { Placebet, Claimfxn } from "../EuclidSwapfunctions/functions.js";
 const GRID_SIZE = 5;
 const MAX_MINES = 25;
 
-function Home({ Token, network, Address }) {
+function Home() {
   const [grid, setGrid] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
@@ -67,6 +67,18 @@ function Home({ Token, network, Address }) {
       setGrid(newGrid);
 
       if (resolveResult === "loss") {
+        const history =
+          JSON.parse(window.localStorage.getItem("history")) || [];
+        const currentSession = {
+          timestamp: new Date().toISOString(),
+          address: playerAddress,
+          betAmount: betAmount,
+          mines: numMines,
+          result: "Loss",
+          profit: `${0}%`,
+        };
+        history.push(currentSession);
+        window.localStorage.setItem("history", JSON.stringify(history));
         setGameOver(true);
         setGameStarted(false);
         toast.error("Game Over! You hit a mine.");
@@ -89,20 +101,28 @@ function Home({ Token, network, Address }) {
   };
 
   const cashOut = async () => {
-    console.log("run");
-
     const address = window.sessionStorage.getItem("address");
+    const amount = multiplier == 1 ? betAmount : await claimWinning(address);
+    const history = JSON.parse(window.localStorage.getItem("history")) || [];
+    const currentSession = {
+      timestamp: new Date().toISOString(),
+      address: address,
+      betAmount: betAmount,
+      mines: numMines,
+      result: "Win",
+      profit: `${(((amount - betAmount) / betAmount) * 100).toFixed(2)}%`,
+    };
+    history.push(currentSession);
+    window.localStorage.setItem("history", JSON.stringify(history));
 
     toast.promise(
       (async () => {
-        const amount =
-          multiplier == 1 ? betAmount : await claimWinning(address);
         const userAddress = window.sessionStorage.getItem("address");
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
         console.log(amount);
-
         const res = await Claimfxn(token_in, amount, userAddress, chanUid);
+        console.log(res);
         if (res) {
           return amount;
         } else {
@@ -115,7 +135,7 @@ function Home({ Token, network, Address }) {
         error: "Error cashing out",
       }
     );
-
+    generateGrid();
     setGameStarted(false);
     setBetAmount(0);
     setNumMines(1);
@@ -129,12 +149,18 @@ function Home({ Token, network, Address }) {
     if (numMines > 1) setNumMines((prevMines) => prevMines - 1);
   };
 
-  const StartGame = () => {
+  const StartGame = async () => {
     if (betAmount === 0) {
       toast.error("Please enter the bet amount");
       return;
     }
     setGameStarted(true);
+    try {
+      console.log("run");
+      await handlePlaceBet();
+    } catch (error) {
+      console.error("Error starting game:", error);
+    }
     generateGrid();
   };
 
@@ -145,6 +171,7 @@ function Home({ Token, network, Address }) {
     const network = {
       chain_uid: window.sessionStorage.getItem("chain_uid"),
       chain_id: chainId,
+      // rpc_url: import.meta.env.VITE_JSON_RPC_ENDPOINT,
     };
 
     if (!userAddress || !chainId || !network.chain_uid) {
@@ -159,6 +186,7 @@ function Home({ Token, network, Address }) {
 
     try {
       let placeBetRes1 = false;
+
       await toast.promise(
         (async () => {
           const placeBetRes1 = await Placebet(
@@ -181,7 +209,7 @@ function Home({ Token, network, Address }) {
         })(),
         {
           loading: "Placing bet...",
-          success: (message) => message,
+          success: () => "Bet placed successfully! Start the game now.",
           error:
             placeBetRes1 === false
               ? "Bet Request rejected"
@@ -240,20 +268,12 @@ function Home({ Token, network, Address }) {
                 </button>
               </div>
             </div>
-            <button
-              onClick={handlePlaceBet}
-              className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold text-xl py-1 px-4 rounded-lg shadow-lg hover:scale-105 transition-transform"
-            >
-              Place Bet
-            </button>
           </div>
         </div>
 
         {/* Mines Selector */}
         <div className="space-y-2">
-          <span className="block text-white text-xl font-semibold">
-            Mines (Diamonds)
-          </span>
+          <span className="block text-white text-xl font-semibold">Mines</span>
           <div className="flex items-center space-x-2">
             <button
               onClick={decreaseMines}

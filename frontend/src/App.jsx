@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/NavBar.jsx";
 import { useState } from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   const [network, setNetwork] = useState(null);
   const [Token, settoken] = useState(null);
@@ -21,10 +21,7 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={<Home Token={Token} network={network} Address={Address} />}
-          />
+          <Route path="/" element={<Home />} />
         </Routes>
       </BrowserRouter>
     </div>
