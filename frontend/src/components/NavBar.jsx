@@ -4,8 +4,8 @@ import { Disclosure } from "@headlessui/react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { Avatar, Modal } from "antd";
-import SideBar from "../components/SideBar"; // Importing SideBar component
-
+import SideBar from "../components/SideBar";
+import {History, LogOut} from "lucide-react";
 export default function Navbar({
   Token,
   settoken,
@@ -112,7 +112,6 @@ export default function Navbar({
   };
 
   const logout = () => {
-    // Clear session data
     window.sessionStorage.clear();
     setAddress(null);
     setNetwork(null);
@@ -121,17 +120,17 @@ export default function Navbar({
   };
 
   return (
-    <Disclosure as="nav" className="bg-neutral-800 text-white sticky top-0 w-full z-10 shadow-md">
+    <Disclosure as="nav" className="bg-gray-800 text-white sticky top-0 w-full z-10 shadow-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            <Disclosure.Button className="inline-flex items-center justify-center p-2 text-gray-400 hover:bg-neutral-700 hover:text-white rounded-md focus:outline-none">
+            <Disclosure.Button className="inline-flex items-center justify-center p-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md focus:outline-none">
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
             </Disclosure.Button>
           </div>
           <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex-shrink-0 text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-yellow-400">
               ChainGamble
             </div>
           </div>
@@ -139,13 +138,14 @@ export default function Navbar({
             {Address ? (
               <button
                 onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-all"
+                className="bg-red-800 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all flex items-center gap-2"
               >
+                <LogOut className="h-[20px]"/>
                 Logout
               </button>
             ) : (
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all"
+                className="bg-blue-800 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all"
                 onClick={() => fetchNetworks()}
               >
                 Connect
@@ -156,8 +156,9 @@ export default function Navbar({
           </div>
         </div>
       </div>
-{/* Network Selection Modal */}
-<Modal
+      
+      {/* Network Selection Modal */}
+      <Modal
         title="Select Network"
         open={isModalOpen}
         onCancel={handleCancel}
@@ -165,11 +166,11 @@ export default function Navbar({
         centered
         bodyStyle={{
           padding: "20px",
-          backgroundColor: "#2D3748",
+          backgroundColor: "#1F2937", // Darker gray background
           borderRadius: "8px",
         }}
         titleStyle={{
-          color: "#F6E05E",
+          color: "#F6E05E", // Yellow color
           fontSize: "1.25rem",
           fontWeight: "bold",
           textAlign: "center",
@@ -179,7 +180,7 @@ export default function Navbar({
           {networks?.map((network, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 rounded-lg bg-neutral-700 hover:bg-neutral-600 cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-lg bg-gray-700 hover:bg-gray-600 cursor-pointer"
               onClick={() => {
                 setNetwork(network);
                 handleCancel();
@@ -201,28 +202,25 @@ export default function Navbar({
 
       {/* Token Selection Modal */}
       <Modal
-        title="Select Token"
-        open={isModalOpen2}
-        onCancel={() => setIsModalOpen2(false)}
-        footer={null}
-        centered
-        bodyStyle={{
-          padding: "20px",
-          backgroundColor: "#2D3748",
-          borderRadius: "8px",
-        }}
-        titleStyle={{
-          color: "#F6E05E",
-          fontSize: "1.25rem",
-          fontWeight: "bold",
-          textAlign: "center",
-        }}
-      >
-        <div className="space-y-4">
+  title="Select Token"
+  open={isModalOpen2}
+  onCancel={() => setIsModalOpen2(false)}
+  footer={null}
+  centered
+  className="bg-black bg-opacity-25 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[6.5px] rounded-lg border border-white border-opacity-20 p-6"
+  titleStyle={{
+    color: "#F6E05E",
+    fontSize: "1.25rem",
+    fontWeight: "bold",
+    textAlign: "center",
+  }}
+>
+
+        <div className="space-y-4 ">
           {Tokens?.map((token, index) => (
             <div
               key={index}
-              className="p-4 rounded-lg bg-neutral-700 hover:bg-neutral-600 cursor-pointer flex justify-between items-center"
+              className="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 cursor-pointer flex justify-between items-center"
               onClick={() => {
                 settoken(token);
                 window.sessionStorage.setItem("token", token);
@@ -234,7 +232,7 @@ export default function Navbar({
             </div>
           ))}
         </div>
-      </Modal>{/* Network Selection and Token Selection Modals remain the same */}
+      </Modal>
     </Disclosure>
   );
 }

@@ -17,8 +17,8 @@ function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [numMines, setNumMines] = useState(1);
   const [betAmount, setBetAmount] = useState(0);
-  const [diamondCount, setDiamondCount] = useState(0); // Track diamond count
-  const [multiplier, setMultiplier] = useState(100000000); // Track current multiplier
+  const [diamondCount, setDiamondCount] = useState(0);
+  const [multiplier, setMultiplier] = useState(100000000);
 
   const maxDiamondCount = 25 - numMines;
 
@@ -27,8 +27,8 @@ function Home() {
       .fill(null)
       .map(() => Array(GRID_SIZE).fill({ type: "empty", revealed: false }));
     setGrid(newGrid);
-    setDiamondCount(0); // Reset diamond count when grid is generated
-    setMultiplier(100000000); // Reset multiplier when grid is generated
+    setDiamondCount(0);
+    setMultiplier(100000000);
   };
 
   useEffect(() => {
@@ -86,8 +86,8 @@ function Home() {
         const playerSession = await getSessionWithPublicKey(playerAddress);
         const currentMultiplier = playerSession?.multiplier || 1;
 
-        setMultiplier(currentMultiplier); // Update multiplier state
-        setDiamondCount((prev) => prev + 1); // Increment diamond count
+        setMultiplier(currentMultiplier);
+        setDiamondCount((prev) => prev + 1);
         toast.success(
           `You found a diamond! Multiplier: x${(
             currentMultiplier / 100000000
@@ -120,9 +120,7 @@ function Home() {
         const userAddress = window.sessionStorage.getItem("address");
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
-        console.log(amount);
         const res = await Claimfxn(token_in, amount, userAddress, chanUid);
-        console.log(res);
         if (res) {
           return amount;
         } else {
@@ -156,12 +154,11 @@ function Home() {
     }
     setGameStarted(true);
     try {
-      console.log("run");
       await handlePlaceBet();
+      generateGrid();
     } catch (error) {
       console.error("Error starting game:", error);
     }
-    generateGrid();
   };
 
   const handlePlaceBet = async () => {
@@ -171,7 +168,6 @@ function Home() {
     const network = {
       chain_uid: window.sessionStorage.getItem("chain_uid"),
       chain_id: chainId,
-      // rpc_url: import.meta.env.VITE_JSON_RPC_ENDPOINT,
     };
 
     if (!userAddress || !chainId || !network.chain_uid) {
@@ -189,6 +185,8 @@ function Home() {
 
       await toast.promise(
         (async () => {
+          console.log("placing");
+          
           const placeBetRes1 = await Placebet(
             token_in,
             betAmount,
@@ -196,6 +194,8 @@ function Home() {
             network
           );
           const placeBetRes = await placeBet(betAmount, userAddress, numMines);
+          console.log(placeBetRes);
+          
 
           if (!placeBetRes1) {
             throw new Error("Bet Request rejected");
@@ -222,126 +222,105 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col lg:flex-row p-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col lg:flex-row p-6">
       <Toaster />
       {/* Sidebar */}
-      <div className="bg-neutral-800 p-6 shadow-lg h-fit w-full lg:w-1/3 space-y-2  lg:mb-0">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg h-fit w-full lg:w-1/3 space-y-2 lg:mb-0">
         <h1 className="text-3xl text-yellow-400 font-bold text-center lg:text-left">
           ChainGamble
         </h1>
-        <div className="block text-white text-md font-semibold">
-          Player Address:{" "}
-          {window.sessionStorage.getItem("address")
-            ? `${window.sessionStorage
-                .getItem("address")
-                .slice(0, 6)}...${window.sessionStorage
-                .getItem("address")
-                .slice(-5)}`
-            : "Not Connected"}
+        <div className="flex gap-2 bg-gray-900 p-4 rounded-lg text-white text-md font-semibold shadow-md">
+          <span>Player Address:</span>
+          <div >
+            {window.sessionStorage.getItem("address")
+              ? `${window.sessionStorage.getItem("address").slice(0, 6)}...${window.sessionStorage.getItem("address").slice(-5)}`
+              : "Not Connected"}
+          </div>
         </div>
 
         {/* Bet Amount */}
-        <div className="space-y-2 ">
-          <span className="block text-white text-xl font-semibold">
-            Bet Amount
-          </span>
-          <div className="flex gap-2 flex-wrap md:justify-between justify-center">
-            <div>
-              <div className="items-center space-x-2">
-                <button
-                  onClick={() => setBetAmount(1)}
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg"
-                >
-                  Min
-                </button>
-                <input
-                  type="number"
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
-                  className="text-center bg-gray-700 text-white w-24 py-2 rounded-lg"
-                />
-                <button
-                  onClick={() => setBetAmount(100)}
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg"
-                >
-                  Max
-                </button>
-              </div>
-            </div>
+        <div className="space-y-2">
+          <span className="block text-white text-lg font-semibold">Bet Amount</span>
+          <div className="flex items-center space-x-2">
+            <button onClick={() => setBetAmount(1)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Min</button>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
+              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-20 py-2 rounded-lg"
+            />
+            <button onClick={() => setBetAmount(100)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Max</button>
           </div>
         </div>
 
         {/* Mines Selector */}
         <div className="space-y-2">
-          <span className="block text-white text-xl font-semibold">Mines</span>
+          <span className="block text-white text-lg font-semibold">Mines</span>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={decreaseMines}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
-            >
-              -
-            </button>
+            <button onClick={decreaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">-</button>
             <input
               type="text"
               value={numMines}
-              className="text-center bg-gray-700 text-white w-20 py-2 rounded-lg"
+              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-20 py-2 rounded-lg"
               readOnly
             />
-            <button
-              onClick={increaseMines}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
-            >
-              +
-            </button>
+            <button onClick={increaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">+</button>
           </div>
         </div>
 
         {/* Score and Multiplier */}
-        <div className="space-y-1">
-          <span className="block text-white text-lg font-semibold">
-            {" "}
-            Multiplier:
-          </span>
-          <div className="flex items-center justify-center lg:justify-start space-x-4">
-            <span className="text-2xl text-yellow-400 font-bold">
-              x{multiplier / 100000000}
-            </span>
-          </div>
+        <div className="space-y-1 text-center lg:text-left">
+          <span className="block text-white text-lg font-semibold">Multiplier:</span>
+          <span className="text-3xl text-yellow-400 font-bold">x{(multiplier / 100000000).toFixed(2)}</span>
         </div>
 
         {/* Start Game or Cash Out Button */}
         <button
           onClick={gameStarted ? cashOut : StartGame}
-          className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-3 text-2xl font-semibold rounded-lg w-full shadow-lg hover:scale-105 transition-transform"
+          className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 text-lg font-semibold rounded-lg w-full hover:scale-105 transition-transform"
         >
-          {gameStarted ? "Cash Out" : "Start Game"}
+          {gameStarted ? "Cash Out" : "Place Bet & Start Game"}
         </button>
       </div>
 
       {/* Game Grid */}
-      <div className="w-full lg:w-2/3 flex items-center justify-center">
-        <div className="grid grid-cols-5 gap-2 w-full max-w-md mx-auto">
+      <div className="w-full lg:w-2/3 flex items-center justify-center mt-6 lg:mt-0">
+        <div className="grid grid-cols-5 gap-2 w-full max-w-md">
+          {" "}
+          {/* Reduced max-width for smaller tiles */}
           {grid.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleClick(rowIndex, colIndex)}
-                className={`w-full aspect-square rounded-md border-2 border-neutral-600 flex justify-center items-center cursor-pointer transform transition-transform duration-500 ${
+                className={`aspect-square w-[5rem] h-[5rem] rounded-lg border border-neutral-700 flex justify-center items-center cursor-pointer transform transition-transform ${
                   cell.revealed
                     ? cell.type === "mine"
                       ? "bg-red-600 border-red-500"
                       : cell.type === "diamond"
-                      ? "bg-green-600 border-green-500"
+                      ? "bg-green-500 border-green-400"
                       : "bg-gray-600 border-gray-500"
-                    : "bg-neutral-800 hover:scale-105"
+                    : "bg-gradient-to-br from-gray-800 to-gray-700 shadow-lg hover:scale-105"
                 }`}
+                style={{
+                  boxShadow: cell.revealed
+                    ? "none"
+                    : "0px 4px 10px rgba(0, 0, 0, 0.3)", // shadow for unrevealed tiles
+                }}
               >
-                {cell.revealed &&
-                  (cell.type === "mine"
-                    ? "💣"
-                    : cell.type === "diamond"
-                    ? "💎"
-                    : "")}
+                {cell.revealed ? (
+                  <span className="text-3xl">
+                    {" "}
+                    {/* Larger size for revealed icons */}
+                    {cell.type === "mine"
+                      ? "💣"
+                      : cell.type === "diamond"
+                      ? "💎"
+                      : ""}
+                  </span>
+                ) : (
+                  <span className="text-4xl font-semibold text-gray-400">{`?`}</span>
+                )}
               </div>
             ))
           )}

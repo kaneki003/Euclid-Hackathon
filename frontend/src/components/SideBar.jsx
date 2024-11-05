@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import { getAllSessions } from "../ContractFunctions/functions";
-
+import { History } from "lucide-react";
 function SideBar() {
   const [show, setShow] = useState(false);
   const [history, setHistory] = useState([]);
@@ -35,7 +35,7 @@ function SideBar() {
   return (
     <>
       <Button variant="outline-light" onClick={handleShow}>
-        View History
+        <div  className="flex items-center"><History className="h-[20px]"/><div>View History</div></div>
       </Button>
 
       <Offcanvas
