@@ -1,0 +1,36 @@
+/* Custom styles for the slider */
+.custom-slider .ant-slider-track {
+    background-color: #fbbf24; /* Custom track color */
+    height: 8px; /* Adjust thickness */
+  }
+  
+  .custom-slider .ant-slider-handle {
+    border-color: #f59e0b; /* Custom handle border color */
+    width: 16px; /* Adjust handle size */
+    height: 16px; /* Adjust handle size */
+  }
+  
+  .custom-slider .ant-slider-rail {
+    background-color: #4b5563; /* Custom rail color */
+    height: 8px; /* Adjust thickness */
+  }
+  
+  /* width */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #817d7d;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -5,7 +5,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { Avatar, Modal } from "antd";
 import SideBar from "../components/SideBar";
-import {History, LogOut} from "lucide-react";
+import { History, LogOut } from "lucide-react";
 export default function Navbar({
   Token,
   settoken,
@@ -120,7 +120,10 @@ export default function Navbar({
   };
 
   return (
-    <Disclosure as="nav" className="bg-gray-800 text-white sticky top-0 w-full z-10 shadow-md">
+    <Disclosure
+      as="nav"
+      className="bg-gray-800 text-white sticky top-0 w-full z-10 shadow-md"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -130,17 +133,19 @@ export default function Navbar({
             </Disclosure.Button>
           </div>
           <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="text-2xl font-bold text-yellow-400">
+            <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-700">
               ChainGamble
             </div>
           </div>
           <div className="hidden sm:flex items-center space-x-4">
+            {/* Sidebar Button */}
+            <SideBar />
             {Address ? (
               <button
                 onClick={logout}
                 className="bg-red-800 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all flex items-center gap-2"
               >
-                <LogOut className="h-[20px]"/>
+                <LogOut className="h-[20px]" />
                 Logout
               </button>
             ) : (
@@ -151,12 +156,10 @@ export default function Navbar({
                 Connect
               </button>
             )}
-            {/* Sidebar Button */}
-            <SideBar />
           </div>
         </div>
       </div>
-      
+
       {/* Network Selection Modal */}
       <Modal
         title="Select Network"
@@ -202,20 +205,19 @@ export default function Navbar({
 
       {/* Token Selection Modal */}
       <Modal
-  title="Select Token"
-  open={isModalOpen2}
-  onCancel={() => setIsModalOpen2(false)}
-  footer={null}
-  centered
-  className="bg-black bg-opacity-25 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[6.5px] rounded-lg border border-white border-opacity-20 p-6"
-  titleStyle={{
-    color: "#F6E05E",
-    fontSize: "1.25rem",
-    fontWeight: "bold",
-    textAlign: "center",
-  }}
->
-
+        title="Select Token"
+        open={isModalOpen2}
+        onCancel={() => setIsModalOpen2(false)}
+        footer={null}
+        centered
+        className="bg-black bg-opacity-25 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[6.5px] rounded-lg border border-white border-opacity-20 p-6"
+        titleStyle={{
+          color: "#F6E05E",
+          fontSize: "1.25rem",
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
+      >
         <div className="space-y-4 ">
           {Tokens?.map((token, index) => (
             <div

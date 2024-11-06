@@ -7,6 +7,7 @@ import {
   getSessionWithPublicKey,
 } from "../ContractFunctions/functions.js";
 import { Placebet, Claimfxn } from "../EuclidSwapfunctions/functions.js";
+import { Slider } from "antd";
 
 const GRID_SIZE = 5;
 const MAX_MINES = 25;
@@ -186,7 +187,7 @@ function Home() {
       await toast.promise(
         (async () => {
           console.log("placing");
-          
+
           const placeBetRes1 = await Placebet(
             token_in,
             betAmount,
@@ -195,7 +196,6 @@ function Home() {
           );
           const placeBetRes = await placeBet(betAmount, userAddress, numMines);
           console.log(placeBetRes);
-          
 
           if (!placeBetRes1) {
             throw new Error("Bet Request rejected");
@@ -225,53 +225,87 @@ function Home() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col lg:flex-row p-6">
       <Toaster />
       {/* Sidebar */}
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg h-fit w-full lg:w-1/3 space-y-2 lg:mb-0">
-        <h1 className="text-3xl text-yellow-400 font-bold text-center lg:text-left">
-          ChainGamble
-        </h1>
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg h-full w-full lg:w-1/3 space-y-5 lg:mb-0">
         <div className="flex gap-2 bg-gray-900 p-4 rounded-lg text-white text-md font-semibold shadow-md">
           <span>Player Address:</span>
-          <div >
+          <div>
             {window.sessionStorage.getItem("address")
-              ? `${window.sessionStorage.getItem("address").slice(0, 6)}...${window.sessionStorage.getItem("address").slice(-5)}`
+              ? `${window.sessionStorage
+                  .getItem("address")
+                  .slice(0, 6)}...${window.sessionStorage
+                  .getItem("address")
+                  .slice(-5)}`
               : "Not Connected"}
           </div>
         </div>
 
         {/* Bet Amount */}
-        <div className="space-y-2">
-          <span className="block text-white text-lg font-semibold">Bet Amount</span>
-          <div className="flex items-center space-x-2">
-            <button onClick={() => setBetAmount(1)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Min</button>
+        <div className="space-y-2 w-full">
+          <span className="block text-white text-lg font-semibold">
+            Bet Amount
+          </span>
+          <div className="flex items-center justify-between space-x-2">
+            <button
+              onClick={() => setBetAmount(1)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              Min
+            </button>
             <input
               type="number"
               value={betAmount}
               onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
-              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-20 py-2 rounded-lg"
+              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-full py-2 rounded-lg"
             />
-            <button onClick={() => setBetAmount(100)} className="bg-gray-700 text-white px-4 py-2 rounded-lg">Max</button>
+            <button
+              onClick={() => setBetAmount(100)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              Max
+            </button>
           </div>
+          <Slider
+            min={1}
+            max={100}
+            value={betAmount}
+            onChange={(value) => setBetAmount(value)}
+            className="w-full mt-2 custom-slider"
+          />
         </div>
 
         {/* Mines Selector */}
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <span className="block text-white text-lg font-semibold">Mines</span>
-          <div className="flex items-center space-x-2">
-            <button onClick={decreaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">-</button>
+          <div className="flex items-center justify-between space-x-2">
+            <button
+              onClick={decreaseMines}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              -
+            </button>
             <input
               type="text"
               value={numMines}
-              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-20 py-2 rounded-lg"
+              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-full py-2 rounded-lg"
               readOnly
             />
-            <button onClick={increaseMines} className="bg-gray-700 text-white px-4 py-2 rounded-lg">+</button>
+            <button
+              onClick={increaseMines}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+            >
+              +
+            </button>
           </div>
         </div>
 
         {/* Score and Multiplier */}
-        <div className="space-y-1 text-center lg:text-left">
-          <span className="block text-white text-lg font-semibold">Multiplier:</span>
-          <span className="text-3xl text-yellow-400 font-bold">x{(multiplier / 100000000).toFixed(2)}</span>
+        <div className="space-y-1 text-center  lg:text-left w-full">
+          <span className="block text-left text-white text-lg font-semibold">
+            Multiplier:
+          </span>
+          <span className="text-3xl  text-yellow-400 font-bold">
+            x{(multiplier / 100000000).toFixed(2)}
+          </span>
         </div>
 
         {/* Start Game or Cash Out Button */}
@@ -284,8 +318,8 @@ function Home() {
       </div>
 
       {/* Game Grid */}
-      <div className="w-full lg:w-2/3 flex items-center justify-center mt-6 lg:mt-0">
-        <div className="grid grid-cols-5 gap-2 w-full max-w-md">
+      <div className="w-full lg:w-2/3 flex items-start justify-center mt-6 lg:mt-0">
+        <div className="grid grid-cols-5 gap-2 w-full max-w-md  mt-10">
           {" "}
           {/* Reduced max-width for smaller tiles */}
           {grid.map((row, rowIndex) =>
@@ -293,7 +327,7 @@ function Home() {
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleClick(rowIndex, colIndex)}
-                className={`aspect-square w-[5rem] h-[5rem] rounded-lg border border-neutral-700 flex justify-center items-center cursor-pointer transform transition-transform ${
+                className={`aspect-square w-[5rem] h-[5rem] rounded-lg border border-neutral-700 flex justify-center items-center cursor-pointer transform transition-transform   ${
                   cell.revealed
                     ? cell.type === "mine"
                       ? "bg-red-600 border-red-500"
@@ -319,7 +353,7 @@ function Home() {
                       : ""}
                   </span>
                 ) : (
-                  <span className="text-4xl font-semibold text-gray-400">{`?`}</span>
+                  <span className="text-4xl font-semibold text-gray-400 hover:text-black transition-colors duration-300 ease-in-out">{`?`}</span>
                 )}
               </div>
             ))

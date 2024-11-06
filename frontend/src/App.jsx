@@ -9,7 +9,7 @@ function App() {
   const [Token, settoken] = useState(null);
   const [Address, setAddress] = useState(null);
   return (
-    <div>
+    <div className="h-screen lg:overflow-hidden">
       <Navbar
         Token={Token}
         settoken={settoken}
