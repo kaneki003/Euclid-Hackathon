@@ -102,22 +102,11 @@ function Home() {
   };
 
   const cashOut = async () => {
-    const address = window.sessionStorage.getItem("address");
-    const amount = multiplier == 1 ? betAmount : await claimWinning(address);
-    const history = JSON.parse(window.localStorage.getItem("history")) || [];
-    const currentSession = {
-      timestamp: new Date().toISOString(),
-      address: address,
-      betAmount: betAmount,
-      mines: numMines,
-      result: "Win",
-      profit: `${(((amount - betAmount) / betAmount) * 100).toFixed(2)}%`,
-    };
-    history.push(currentSession);
-    window.localStorage.setItem("history", JSON.stringify(history));
-
     toast.promise(
       (async () => {
+        const address = window.sessionStorage.getItem("address");
+        const amount =
+          multiplier == 1 ? betAmount : await claimWinning(address);
         const userAddress = window.sessionStorage.getItem("address");
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
@@ -134,6 +123,17 @@ function Home() {
         error: "Error cashing out",
       }
     );
+    const history = JSON.parse(window.localStorage.getItem("history")) || [];
+    const currentSession = {
+      timestamp: new Date().toISOString(),
+      address: address,
+      betAmount: betAmount,
+      mines: numMines,
+      result: "Win",
+      profit: `${(((amount - betAmount) / betAmount) * 100).toFixed(2)}%`,
+    };
+    history.push(currentSession);
+    window.localStorage.setItem("history", JSON.stringify(history));
     generateGrid();
     setGameStarted(false);
     setBetAmount(0);
@@ -222,32 +222,30 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col lg:flex-row p-6">
+    <div className="h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col justify-center items-center lg:flex-row p-6 px-12 gap-4">
       <Toaster />
       {/* Sidebar */}
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg h-full w-full lg:w-1/3 space-y-5 lg:mb-0">
-        <div className="flex gap-2 bg-gray-900 p-4 rounded-lg text-white text-md font-semibold shadow-md">
-          <span>Player Address:</span>
-          <div>
+      <div className="bg-gray-800 flex flex-col items-center justify-center py-4 px-4 h-[90vh] rounded-lg shadow-lg lg:w-1/4 space-y-5 lg:mb-0">
+        <div className="flex flex-col gap-2 w-full bg-gray-900 px-4 py-6 h-1/5 justify-center rounded-lg font-semibold shadow-md">
+          <div className="text-2xl text-gray-400">Player Address</div>
+          <div className="text-lg text-yellow-400">
             {window.sessionStorage.getItem("address")
               ? `${window.sessionStorage
                   .getItem("address")
                   .slice(0, 6)}...${window.sessionStorage
                   .getItem("address")
-                  .slice(-5)}`
+                  .slice(-4)}`
               : "Not Connected"}
           </div>
         </div>
 
         {/* Bet Amount */}
-        <div className="space-y-2 w-full">
-          <span className="block text-white text-lg font-semibold">
-            Bet Amount
-          </span>
+        <div className="space-y-2 flex flex-col gap-2 w-full bg-gray-900 px-4 py-16  h-1/5 justify-center rounded-lg font-semibold shadow-md">
+          <span className="block text-2xl text-gray-400">Bet Amount</span>
           <div className="flex items-center justify-between space-x-2">
             <button
               onClick={() => setBetAmount(1)}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+              className="bg-gray-700 text-white px-4 py-1 rounded-lg"
             >
               Min
             </button>
@@ -255,11 +253,11 @@ function Home() {
               type="number"
               value={betAmount}
               onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
-              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-full py-2 rounded-lg"
+              className="text-center text-sm bg-gray-900 text-yellow-400 border-2 border-gray-700 w-full py-1 rounded-lg"
             />
             <button
               onClick={() => setBetAmount(100)}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+              className="bg-gray-700 text-white px-4 py-1 rounded-lg"
             >
               Max
             </button>
@@ -269,13 +267,13 @@ function Home() {
             max={100}
             value={betAmount}
             onChange={(value) => setBetAmount(value)}
-            className="w-full mt-2 custom-slider"
+            className="w-full custom-slider"
           />
         </div>
 
         {/* Mines Selector */}
-        <div className="space-y-2 w-full">
-          <span className="block text-white text-lg font-semibold">Mines</span>
+        <div className="space-y-2 flex flex-col gap-2 w-full bg-gray-900 px-4 py-16 h-1/5 justify-center rounded-lg font-semibold shadow-md">
+          <span className="block text-2xl text-gray-400">Mines</span>
           <div className="flex items-center justify-between space-x-2">
             <button
               onClick={decreaseMines}
@@ -286,7 +284,7 @@ function Home() {
             <input
               type="text"
               value={numMines}
-              className="text-center bg-gray-900 text-yellow-400 border border-gray-700 w-full py-2 rounded-lg"
+              className="text-center bg-gray-900 text-yellow-400 border-2 border-gray-700 w-full py-2 rounded-lg"
               readOnly
             />
             <button
@@ -299,11 +297,9 @@ function Home() {
         </div>
 
         {/* Score and Multiplier */}
-        <div className="space-y-1 text-center  lg:text-left w-full">
-          <span className="block text-left text-white text-lg font-semibold">
-            Multiplier:
-          </span>
-          <span className="text-3xl  text-yellow-400 font-bold">
+        <div className="space-y-2 flex flex-col gap-2 w-full bg-gray-900 px-4 py-16 h-1/5 justify-center rounded-lg font-semibold shadow-md">
+          <span className="block text-2xl text-gray-400">Multiplier</span>
+          <span className="text-5xl font-bold  text-yellow-300 flex items-center justify-center">
             x{(multiplier / 100000000).toFixed(2)}
           </span>
         </div>
@@ -318,23 +314,25 @@ function Home() {
       </div>
 
       {/* Game Grid */}
-      <div className="w-full lg:w-2/3 flex items-start justify-center mt-6 lg:mt-0">
-        <div className="grid grid-cols-5 gap-2 w-full max-w-md  mt-10">
-          {" "}
-          {/* Reduced max-width for smaller tiles */}
+      <div className="h-[90vh] rounded-lg lg:w-3/4 flex items-center justify-center mt-6 py-2 lg:mt-0 bg-gray-800 relative">
+        <div
+          className={`grid grid-cols-5 w-full h-full items-center lg:pl-[6vw] ${
+            !gameStarted ? "pointer-events-none" : ""
+          }`}
+        >
           {grid.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleClick(rowIndex, colIndex)}
-                className={`aspect-square w-[5rem] h-[5rem] rounded-lg border border-neutral-700 flex justify-center items-center cursor-pointer transform transition-transform   ${
+                className={`aspect-square w-[7vw] h-[7vw] rounded-lg border border-neutral-700 flex justify-center items-center cursor-pointer transform transition-transform  ${
                   cell.revealed
                     ? cell.type === "mine"
                       ? "bg-red-600 border-red-500"
                       : cell.type === "diamond"
-                      ? "bg-green-500 border-green-400"
+                      ? "bg-green-700 border-green-600"
                       : "bg-gray-600 border-gray-500"
-                    : "bg-gradient-to-br from-gray-800 to-gray-700 shadow-lg hover:scale-105"
+                    : "bg-gradient-to-br from-gray-600 to-gray-800 shadow-lg hover:scale-105"
                 }`}
                 style={{
                   boxShadow: cell.revealed

@@ -120,19 +120,16 @@ export default function Navbar({
   };
 
   return (
-    <Disclosure
-      as="nav"
-      className="bg-gray-800 text-white sticky top-0 w-full z-10 shadow-md"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav className="bg-gray-800 text-white sticky top-0 w-full z-10 shadow-md ">
+      <div className="px-4 sm:px-6 lg:px-8 w-full">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            <Disclosure.Button className="inline-flex items-center justify-center p-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md focus:outline-none">
+            {/* <Disclosure.Button className="inline-flex items-center justify-center p-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md focus:outline-none">
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-            </Disclosure.Button>
+            </Disclosure.Button> */}
           </div>
-          <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+          <div className="flex  items-center justify-center sm:items-stretch sm:justify-start">
             <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-700">
               ChainGamble
             </div>
@@ -235,6 +232,6 @@ export default function Navbar({
           ))}
         </div>
       </Modal>
-    </Disclosure>
+    </nav>
   );
 }

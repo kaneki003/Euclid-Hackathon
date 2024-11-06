@@ -9,7 +9,7 @@ function App() {
   const [Token, settoken] = useState(null);
   const [Address, setAddress] = useState(null);
   return (
-    <div className="h-screen lg:overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <Navbar
         Token={Token}
         settoken={settoken}

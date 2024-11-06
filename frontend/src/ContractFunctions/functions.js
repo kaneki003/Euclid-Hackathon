@@ -84,7 +84,7 @@ function getSecureRandomInt(max) {
 
 //Getting result for whether player won or lost the game
 export async function resolveGame(player) {
-  let number = getSecureRandomInt(100000000);
+  let number = getSecureRandomInt(200000000);
   console.log(number);
 
   const { txClient } = await setup();
