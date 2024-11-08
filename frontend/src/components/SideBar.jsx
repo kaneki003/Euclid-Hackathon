@@ -12,10 +12,7 @@ function SideBar() {
 
   useEffect(() => {
     const sessions = JSON.parse(localStorage.getItem("history")) || [];
-    console.log("Sessions:", sessions);
 
-    // Save the history in local storage for future use
-    // Format session data for display
     const formattedHistory = sessions
       .map((session, index) => ({
         id: index + 1,
@@ -35,7 +32,10 @@ function SideBar() {
   return (
     <>
       <Button variant="outline-light" onClick={handleShow}>
-        <div  className="flex items-center"><History className="h-[20px]"/><div>View History</div></div>
+        <div className="flex items-center">
+          <History className="h-[20px]" />
+          <div>View History</div>
+        </div>
       </Button>
 
       <Offcanvas

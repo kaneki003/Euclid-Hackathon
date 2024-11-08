@@ -80,9 +80,11 @@ function Home() {
         };
         history.push(currentSession);
         window.localStorage.setItem("history", JSON.stringify(history));
+        toast.error("Game Over! You hit a mine.");
         setGameOver(true);
         setGameStarted(false);
-        toast.error("Game Over! You hit a mine.");
+        setBetAmount(0);
+        setNumMines(1);
       } else {
         const playerSession = await getSessionWithPublicKey(playerAddress);
         const currentMultiplier = playerSession?.multiplier || 1;
@@ -97,7 +99,6 @@ function Home() {
       }
     } catch (error) {
       toast.error("Error resolving game");
-      console.error(error);
     }
   };
 
@@ -111,6 +112,22 @@ function Home() {
         const token_in = window.sessionStorage.getItem("token");
         const chanUid = window.sessionStorage.getItem("chain_uid");
         const res = await Claimfxn(token_in, amount, userAddress, chanUid);
+        const history =
+          JSON.parse(window.localStorage.getItem("history")) || [];
+        const currentSession = {
+          timestamp: new Date().toISOString(),
+          address: address,
+          betAmount: betAmount,
+          mines: numMines,
+          result: "Win",
+          profit: `${(((amount - betAmount) / betAmount) * 100).toFixed(2)}%`,
+        };
+        history.push(currentSession);
+        window.localStorage.setItem("history", JSON.stringify(history));
+        generateGrid();
+        setGameStarted(false);
+        setBetAmount(0);
+        setNumMines(1);
         if (res) {
           return amount;
         } else {
@@ -123,21 +140,6 @@ function Home() {
         error: "Error cashing out",
       }
     );
-    const history = JSON.parse(window.localStorage.getItem("history")) || [];
-    const currentSession = {
-      timestamp: new Date().toISOString(),
-      address: address,
-      betAmount: betAmount,
-      mines: numMines,
-      result: "Win",
-      profit: `${(((amount - betAmount) / betAmount) * 100).toFixed(2)}%`,
-    };
-    history.push(currentSession);
-    window.localStorage.setItem("history", JSON.stringify(history));
-    generateGrid();
-    setGameStarted(false);
-    setBetAmount(0);
-    setNumMines(1);
   };
 
   const increaseMines = () => {
@@ -158,7 +160,7 @@ function Home() {
       await handlePlaceBet();
       generateGrid();
     } catch (error) {
-      console.error("Error starting game:", error);
+      console.log(error);
     }
   };
 
@@ -186,8 +188,6 @@ function Home() {
 
       await toast.promise(
         (async () => {
-          console.log("placing");
-
           const placeBetRes1 = await Placebet(
             token_in,
             betAmount,
@@ -195,7 +195,6 @@ function Home() {
             network
           );
           const placeBetRes = await placeBet(betAmount, userAddress, numMines);
-          console.log(placeBetRes);
 
           if (!placeBetRes1) {
             throw new Error("Bet Request rejected");
@@ -217,7 +216,7 @@ function Home() {
         }
       );
     } catch (error) {
-      console.error("Error placing bet:", error);
+      console.log(error);
     }
   };
 

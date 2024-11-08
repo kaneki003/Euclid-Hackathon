@@ -28,8 +28,6 @@ const getRoutes = async (token_in, token_out, amount) => {
   };
 
   try {
-    console.log(amount); // Log the amount for debugging
-
     const response = await axios.post(
       "https://testnet.api.euclidprotocol.com/api/v1/routes",
       payload,
@@ -41,7 +39,6 @@ const getRoutes = async (token_in, token_out, amount) => {
     );
 
     const route = response.data.paths[0].route;
-    console.log(route); // Optional: Log the route for debugging
     return route; // Return the route
   } catch (error) {
     console.error("Error fetching routes:", error); // Handle errors
@@ -50,8 +47,6 @@ const getRoutes = async (token_in, token_out, amount) => {
 };
 
 const tokenDenom = async (chainuid, tokenid) => {
-  console.log(chainuid, tokenid);
-
   const payload = {
     query: `
       query Escrow($chainUid: String!, $tokenId: String) {
@@ -80,8 +75,6 @@ const tokenDenom = async (chainuid, tokenid) => {
   };
 
   try {
-    // Make the POST request using Axios
-    console.log(chainuid, tokenid);
     const response = await axios.post(
       "https://testnet.api.euclidprotocol.com/graphql",
       payload,
@@ -93,7 +86,6 @@ const tokenDenom = async (chainuid, tokenid) => {
     );
 
     const denomData = response.data.data.factory.escrow.denoms[0];
-    console.log("Full response data:", JSON.stringify(response.data, null, 2));
     return denomData;
   } catch (err) {
     console.error("Error fetching token denom:", err);
@@ -118,7 +110,6 @@ const getdecimals = async (tokenId) => {
   };
 
   try {
-    // Make the POST request using Axios
     const response = await axios.post(
       "https://testnet.api.euclidprotocol.com/graphql",
       payload,
@@ -129,10 +120,8 @@ const getdecimals = async (tokenId) => {
       }
     );
 
-    // Store the coinDecimal from the response
     const coinDecimal =
       response.data.data.token.token_metadata_by_id.coinDecimal;
-    console.log(coinDecimal); // Optional: Log the value for debugging
 
     return coinDecimal; // Return the value
   } catch (err) {
@@ -160,7 +149,6 @@ const prefixaddress = async (chainuid) => {
   };
 
   try {
-    // Make the POST request using Axios
     const response = await axios.post(
       "https://testnet.api.euclidprotocol.com/graphql",
       payload,
@@ -171,10 +159,8 @@ const prefixaddress = async (chainuid) => {
       }
     );
 
-    // Access and store the response
     const bech32PrefixAccAddr =
       response.data.data.chains.keplr_config.bech32Config.bech32PrefixAccAddr;
-    console.log(bech32PrefixAccAddr); // Optional: Log the value for debugging
 
     return bech32PrefixAccAddr; // Return the value here
   } catch (err) {
@@ -227,7 +213,6 @@ const executeSwapfxn = async (
   };
 
   const response = await axios.post(SwapUrl, body, { headers });
-  console.log(response.data);
   return response.data;
 };
 
@@ -270,10 +255,6 @@ const simulateSwap = async (token_in, token_out, amount_in) => {
       },
     });
 
-    console.log(
-      "Simulate Swap Response:",
-      response.data.data.router.simulate_swap
-    );
     return (
       Number(response.data.data.router.simulate_swap.amount_out) /
       Math.pow(10, decimal_out)
@@ -286,8 +267,6 @@ const simulateSwap = async (token_in, token_out, amount_in) => {
 
 export const Placebet = async (token_in, amount, senderAddress, network) => {
   try {
-    console.log("trying", token_in, amount, senderAddress, network.chain_uid);
-
     const response = await executeSwapfxn(
       token_in,
       common_token_id,
@@ -316,7 +295,6 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
             timeout: msg.msg.send.timeout || null,
           },
         };
-        console.log(swapmsg.type);
         // Encode the swap message
         return client.encodeExecuteMsg(msg.contractAddress, swapmsg, [
           ...(msg.funds || []),
@@ -329,7 +307,6 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
       ]);
     });
 
-    console.log(encodedMsgs);
     const denom = await tokenDenom(network.chain_uid, token_in);
     const fee = {
       amount: [{ denom: denom.native.denom, amount: "5000" }],
@@ -349,15 +326,13 @@ export const Placebet = async (token_in, amount, senderAddress, network) => {
         fee,
         "Send tokens"
       );
-      console.log(result);
       return true;
     }
 
     const tx = await client.signAndBroadcast(encodedMsgs, fee, "Swap");
-    console.log(tx);
     return true;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return false;
   }
 };
@@ -369,7 +344,6 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
       common_token_id,
       amount
     );
-    console.log(giving_amount);
 
     const response = await executeSwapfxn(
       common_token_id,
@@ -411,7 +385,6 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
             timeout: msg.msg.send.timeout || null,
           },
         };
-        console.log(swapmsg.type);
         // Encode the swap message
         return client1.encodeExecuteMsg(msg.contractAddress, swapmsg, [
           ...(msg.funds || []),
@@ -438,12 +411,8 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
         "Send tokens"
       );
 
-      console.log(result);
       return true;
     }
-    // console.log(encodedMsgs,token_out);
-
-    console.log("testup,signupbroadcast", encodedMsgs, commonAddress);
 
     const tx = await client.signAndBroadcast(
       commonAddress,
@@ -451,10 +420,9 @@ export const Claimfxn = async (token_out, amount, receiverAddr, chain_uid) => {
       "auto",
       "Swap"
     );
-    console.log(tx);
     return true;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return false;
   }
 };

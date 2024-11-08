@@ -29,7 +29,6 @@ export async function getAllSessions() {
     queryMsg
   );
 
-  // console.log("Query Result:", querySessions);
   return querySessions;
 }
 
@@ -46,7 +45,6 @@ export async function getSessionWithPublicKey(player) {
     queryMsg
   );
 
-  // console.log("Player Session:", getSession);
   return getSession;
 }
 
@@ -68,7 +66,6 @@ export async function placeBet(amount, player, mines) {
       "auto"
     );
 
-    console.log("Place Bet Result:", result);
     return true;
   } catch (err) {
     console.log(err);
@@ -84,8 +81,7 @@ function getSecureRandomInt(max) {
 
 //Getting result for whether player won or lost the game
 export async function resolveGame(player) {
-  let number = getSecureRandomInt(200000000);
-  console.log(number);
+  let number = getSecureRandomInt(300000000);
 
   const { txClient } = await setup();
   const executeMsg = {
@@ -118,7 +114,6 @@ export async function resolveGame(player) {
     if (resultValue) break;
   }
 
-  // console.log("Game Result Value:", resultValue);
   return resultValue;
 }
 
@@ -157,25 +152,8 @@ export async function claimWinning(player) {
   }
 
   if (resultValue !== null) {
-    console.log("Winning amount:", resultValue);
     return parseFloat(resultValue); // Assuming resultValue is numeric
   } else {
-    console.error("Amount not found in transaction log.");
     throw new Error("Claim winning failed, amount not found.");
   }
 }
-
-// Example API calls
-// getAllSessions().catch(console.error);
-// getSessionWithPublicKey("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(
-//   console.error
-// );
-// placeBet(10000, "nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp", 10).catch(
-//   console.error
-// );
-// resolveGame("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(
-//   console.error
-// );
-// claimWinning("nibi18veje0qj69perf75j25wznj8cfxwxld54ssxqp").catch(
-//   console.error
-// );
