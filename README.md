@@ -27,6 +27,14 @@
 
 - **Intuitive Design**: Built with a user-friendly interface to allow smooth navigation and easy betting.
 
+## App Demo
+
+[Watch the video](demo.mp4)
+
+## Architecture
+
+![Architecture](image.png)
+
 ## 🚀 Getting Started
 
 ## FrontEnd
