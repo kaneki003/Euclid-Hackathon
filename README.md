@@ -27,6 +27,9 @@
 
 - **Intuitive Design**: Built with a user-friendly interface to allow smooth navigation and easy betting.
 
+## App Link
+[ChainGamble](https://euclid-hackathon-885zf3fmm-kaneki003s-projects.vercel.app/)
+
 ## App Demo
 
 [Watch the video](demo.mp4)
