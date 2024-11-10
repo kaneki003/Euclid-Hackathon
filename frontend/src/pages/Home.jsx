@@ -126,6 +126,7 @@ function Home() {
         window.localStorage.setItem("history", JSON.stringify(history));
         generateGrid();
         setGameStarted(false);
+        setGameOver(true);
         setBetAmount(0);
         setNumMines(1);
         if (res) {
@@ -201,6 +202,7 @@ function Home() {
           }
           if (placeBetRes && placeBetRes1) {
             setGameStarted(true);
+            setGameOver(false);
             return "Bet placed successfully! Start the game now.";
           } else {
             throw new Error("Error placing bet");
